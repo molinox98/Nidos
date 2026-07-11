@@ -39,7 +39,6 @@ services:
       - minio
     volumes:
       - ./backend:/app
-    command: sh -c "echo 'Backend pendiente de crear' && sleep infinity"
 
   frontend:
     build: ./frontend
