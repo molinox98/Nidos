@@ -13,4 +13,5 @@ urlpatterns = [
     path('api/', include('apps.nests.urls')),
     path('api/', include('apps.observations.urls')),
     path('api/', include('apps.events.urls')),
+    path('api/', include('apps.mediafiles.urls')),
 ]

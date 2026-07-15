@@ -121,3 +121,26 @@ MINIO_BUCKET_NAME = env('MINIO_BUCKET_NAME')
 MINIO_USE_SSL = env('MINIO_USE_SSL')
 MINIO_ROOT_USER = env('MINIO_ROOT_USER')
 MINIO_ROOT_PASSWORD = env('MINIO_ROOT_PASSWORD')
+
+_external_host = MINIO_EXTERNAL_ENDPOINT.replace('http://', '').replace('https://', '')
+
+STORAGES = {
+    'default': {
+        'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
+        'OPTIONS': {
+            'endpoint_url': f'http://{MINIO_ENDPOINT}',
+            'access_key': MINIO_ROOT_USER,
+            'secret_key': MINIO_ROOT_PASSWORD,
+            'bucket_name': MINIO_BUCKET_NAME,
+            'default_acl': 'public-read',
+            'querystring_auth': False,
+            'addressing_style': 'path',
+            'use_ssl': False,
+            'url_protocol': 'http:',
+            'custom_domain': f'{_external_host}/{MINIO_BUCKET_NAME}',
+        },
+    },
+    'staticfiles': {
+        'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+    },
+}

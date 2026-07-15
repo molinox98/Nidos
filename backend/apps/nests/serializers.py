@@ -129,4 +129,7 @@ class NidoMapaSerializer(serializers.Serializer):
         return obs.cantidad_polluelos if obs else None
 
     def get_foto_principal(self, obj):
+        img = obj.imagenes.filter(es_principal=True).first()
+        if img and img.archivo:
+            return img.archivo.url
         return None
