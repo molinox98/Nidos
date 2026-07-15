@@ -1,8 +1,11 @@
+from rest_framework import viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from apps.common.permissions import SoloAdmin
+from apps.users.models import Usuario
 from apps.users.serializers import CustomTokenObtainSerializer, UsuarioSerializer
 
 
@@ -29,3 +32,9 @@ class UsuarioActualView(APIView):
     def get(self, request):
         serializer = UsuarioSerializer(request.user)
         return Response(serializer.data)
+
+
+class UsuarioViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Usuario.objects.all().order_by('nombre')
+    serializer_class = UsuarioSerializer
+    permission_classes = [SoloAdmin]
