@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import logo from '../assets/logo-nidos.png'
-import MapPlaceholder from './MapPlaceholder'
+import NestsMap from './NestsMap'
 
 const SECCIONES = [
   { id: 'nidos', label: 'Gestión de nidos' },
@@ -20,7 +20,7 @@ const ROLES = {
 function AppLayout() {
   const { usuario, logout } = useAuth()
   const [seccionActiva, setSeccionActiva] = useState(null)
-  const [sidebarAbierto, setSidebarAbierto] = useState(true)
+  const [sidebarAbierto, setSidebarAbierto] = useState(false)
 
   return (
     <div className="layout">
@@ -67,8 +67,13 @@ function AppLayout() {
           </ul>
         </nav>
 
+        <div
+          className={`layout-overlay ${sidebarAbierto ? '' : 'layout-sidebar--oculto'}`}
+          onClick={() => setSidebarAbierto(false)}
+        />
+
         <main className="layout-contenido">
-          {seccionActiva === null && <MapPlaceholder />}
+          {seccionActiva === null && <NestsMap sidebarAbierto={sidebarAbierto} />}
           {seccionActiva !== null && (
             <div className="layout-placeholder">
               <h2>{SECCIONES.find((s) => s.id === seccionActiva)?.label}</h2>
