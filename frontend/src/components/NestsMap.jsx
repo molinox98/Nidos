@@ -4,6 +4,7 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { getNidosMapa } from '../api/nidos'
 import { formatoFecha, textoEstado, colorEstado } from '../utils/date'
+import NestDetailPanel from './NestDetailPanel'
 
 const CENTRO_ANDORRA = [42.5063, 1.5218]
 const ANDORRA_BOUNDS = L.latLngBounds([42.42, 1.40], [42.66, 1.79])
@@ -37,7 +38,7 @@ function crearIcono(color, size) {
   })
 }
 
-function NestPopup({ nido }) {
+function NestPopup({ nido, onVerFicha }) {
   const foto = nido.foto_principal
   return (
     <div className="nest-popup">
@@ -91,11 +92,14 @@ function NestPopup({ nido }) {
           )}
         </tbody>
       </table>
+      <button className="nest-popup-ver-ficha" onClick={() => onVerFicha(nido.id)}>
+        Ver ficha
+      </button>
     </div>
   )
 }
 
-function Marcadores({ nidos, zoom, onSeleccionar }) {
+function Marcadores({ nidos, zoom, onSeleccionar, onVerFicha }) {
   const handleClick = useCallback((nido) => {
     if (esMovil()) {
       onSeleccionar(nido)
@@ -111,7 +115,7 @@ function Marcadores({ nidos, zoom, onSeleccionar }) {
     >
       {!esMovil() && (
         <Popup maxWidth={300}>
-          <NestPopup nido={nido} />
+          <NestPopup nido={nido} onVerFicha={onVerFicha} />
         </Popup>
       )}
     </Marker>
@@ -134,7 +138,7 @@ function MapInvalidator({ sidebarAbierto }) {
   return null
 }
 
-function FichaNido({ nido, onCerrar }) {
+function FichaNido({ nido, onCerrar, onVerFicha }) {
   if (!nido) return null
   const foto = nido.foto_principal
 
@@ -192,6 +196,9 @@ function FichaNido({ nido, onCerrar }) {
             )}
           </tbody>
         </table>
+        <button className="ficha-ver-detalle" onClick={() => onVerFicha(nido.id)}>
+          Ver ficha completa
+        </button>
       </div>
     </div>
   )
@@ -203,6 +210,7 @@ function NestsMap({ sidebarAbierto }) {
   const [error, setError] = useState(null)
   const [zoom, setZoom] = useState(12)
   const [nidoSeleccionado, setNidoSeleccionado] = useState(null)
+  const [nidoDetalleId, setNidoDetalleId] = useState(null)
 
   useEffect(() => {
     getNidosMapa()
@@ -246,7 +254,12 @@ function NestsMap({ sidebarAbierto }) {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         {nidos.length > 0 && (
-          <Marcadores nidos={nidos} zoom={zoom} onSeleccionar={setNidoSeleccionado} />
+          <Marcadores
+            nidos={nidos}
+            zoom={zoom}
+            onSeleccionar={setNidoSeleccionado}
+            onVerFicha={setNidoDetalleId}
+          />
         )}
       </MapContainer>
       {nidos.length === 0 && (
@@ -254,7 +267,20 @@ function NestsMap({ sidebarAbierto }) {
           <p>No hay nidos registrados.</p>
         </div>
       )}
-      <FichaNido nido={nidoSeleccionado} onCerrar={() => setNidoSeleccionado(null)} />
+      <FichaNido
+        nido={nidoSeleccionado}
+        onCerrar={() => setNidoSeleccionado(null)}
+        onVerFicha={(id) => {
+          setNidoSeleccionado(null)
+          setNidoDetalleId(id)
+        }}
+      />
+      {nidoDetalleId && (
+        <NestDetailPanel
+          nidoId={nidoDetalleId}
+          onCerrar={() => setNidoDetalleId(null)}
+        />
+      )}
     </div>
   )
 }

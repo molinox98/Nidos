@@ -515,6 +515,325 @@
   padding-right: 0.6rem;
 }
 
+.ficha-ver-detalle {
+  display: block;
+  width: 100%;
+  margin-top: 0.8rem;
+  padding: 0.6rem;
+  background: #1f5c3b;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.ficha-ver-detalle:hover {
+  background: #244a36;
+}
+
+/* Botón ver ficha en popup escritorio */
+
+.nest-popup-ver-ficha {
+  display: block;
+  width: 100%;
+  margin-top: 0.6rem;
+  padding: 0.45rem;
+  background: #1f5c3b;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.nest-popup-ver-ficha:hover {
+  background: #244a36;
+}
+
+/* Panel lateral de detalle */
+
+.panel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 1300;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.panel-lateral {
+  width: min(600px, 42vw);
+  min-width: 400px;
+  max-width: 100%;
+  height: 100%;
+  background: #fff;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  background: #1f5c3b;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.panel-titulo {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.panel-cerrar {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.panel-cerrar:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.panel-cuerpo {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem;
+}
+
+.panel-estado {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: #888;
+}
+
+.panel-estado--error {
+  color: #c0392b;
+}
+
+.panel-foto {
+  display: block;
+  width: 100%;
+  max-height: 260px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+
+.panel-sin-foto {
+  width: 100%;
+  padding: 2.5rem;
+  background: #f0f2ef;
+  border-radius: 10px;
+  text-align: center;
+  color: #aaa;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.panel-cabecera-nido {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.panel-nombre {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #24302a;
+}
+
+.panel-estado-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.panel-grupo {
+  margin: 0 0 0.3rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.panel-info-linea {
+  margin: 0 0 0.3rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+/* Secciones del panel */
+
+.panel-seccion {
+  margin-top: 1.5rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid #eee;
+}
+
+.panel-seccion-titulo {
+  margin: 0 0 0.6rem;
+  font-size: 0.95rem;
+  color: #24302a;
+  font-weight: 600;
+}
+
+.panel-tabla {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.panel-tabla td {
+  padding: 0.3rem 0;
+  vertical-align: top;
+  font-size: 0.9rem;
+}
+
+.panel-tabla-label {
+  color: #888;
+  white-space: nowrap;
+  padding-right: 0.75rem;
+  width: 1%;
+}
+
+/* Listas históricas */
+
+.panel-historico {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.panel-historico-item {
+  background: #f8faf8;
+  border: 1px solid #e8ece8;
+  border-radius: 8px;
+  padding: 0.7rem 0.85rem;
+}
+
+.panel-historico-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.panel-historico-fecha {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #24302a;
+}
+
+.panel-historico-especie,
+.panel-historico-tipo {
+  font-size: 0.8rem;
+  color: #1f5c3b;
+  background: #e8f5e9;
+  padding: 0.1rem 0.5rem;
+  border-radius: 10px;
+}
+
+.panel-historico-datos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: #555;
+}
+
+.panel-historico-notas {
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+  color: #666;
+  font-style: italic;
+}
+
+.panel-historico-usuario {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.78rem;
+  color: #999;
+}
+
+/* Galería de imágenes */
+
+.panel-galeria {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+
+.panel-galeria-item {
+  border: 1px solid #e8ece8;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f8faf8;
+}
+
+.panel-galeria-foto {
+  display: block;
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+}
+
+.panel-galeria-info {
+  padding: 0.45rem 0.55rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.panel-galeria-desc {
+  font-size: 0.78rem;
+  color: #555;
+}
+
+.panel-galeria-meta {
+  font-size: 0.72rem;
+  color: #999;
+}
+
+.panel-galeria-principal {
+  font-size: 0.72rem;
+  color: #1f5c3b;
+  font-weight: 600;
+}
+
+.panel-vacio {
+  color: #999;
+  font-size: 0.85rem;
+  font-style: italic;
+  margin: 0;
+}
+
 /* Responsive móvil */
 
 @media (max-width: 768px) {
@@ -549,6 +868,19 @@
 
   .layout-contenido {
     padding: 0;
+  }
+
+  .panel-overlay {
+    align-items: stretch;
+  }
+
+  .panel-lateral {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .panel-galeria {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   }
 }
 
