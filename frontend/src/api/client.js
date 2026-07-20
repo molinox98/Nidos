@@ -62,3 +62,10 @@ export async function apiPost(path, body) {
 export async function apiGet(path) {
   return apiRequest(path)
 }
+
+export async function apiPatch(path, body) {
+  return apiRequest(path, {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  })
+}

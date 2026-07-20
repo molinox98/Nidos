@@ -4,9 +4,12 @@ import { getObservaciones } from '../api/observaciones'
 import { getEventos } from '../api/eventos'
 import { getImagenes } from '../api/imagenes'
 import { formatoFecha, textoEstado, colorEstado } from '../utils/date'
+import { useAuth } from '../context/AuthContext'
 import NestObservationsHistory from './NestObservationsHistory'
 import NestEventsHistory from './NestEventsHistory'
 import NestImagesGallery from './NestImagesGallery'
+import NestObservationForm from './NestObservationForm'
+import NestEventForm from './NestEventForm'
 
 const METODO_UBICACION_TEXTO = {
   manual_mapa: 'Mapa',
@@ -39,15 +42,20 @@ function Seccion({ titulo, children }) {
   )
 }
 
-export default function NestDetailPanel({ nidoId, onCerrar }) {
+export default function NestDetailPanel({ nidoId, onCerrar, onRecargar }) {
+  const { usuario } = useAuth()
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
   const [detalle, setDetalle] = useState(null)
   const [observaciones, setObservaciones] = useState([])
   const [eventos, setEventos] = useState([])
   const [imagenes, setImagenes] = useState([])
+  const [mostrandoFormObs, setMostrandoFormObs] = useState(false)
+  const [mostrandoFormEvento, setMostrandoFormEvento] = useState(false)
 
-  useEffect(() => {
+  const puedeCrear = usuario && (usuario.rol === 'admin' || usuario.rol === 'bander')
+
+  const cargarDatos = () => {
     if (!nidoId) return
 
     let cancelado = false
@@ -81,7 +89,45 @@ export default function NestDetailPanel({ nidoId, onCerrar }) {
       })
 
     return () => { cancelado = true }
+  }
+
+  useEffect(() => {
+    const cancel = cargarDatos()
+    return cancel
   }, [nidoId])
+
+  const handleCrearObservacion = () => {
+    setMostrandoFormObs(false)
+    cargarDatos()
+    if (onRecargar) onRecargar()
+  }
+
+  const handleCrearEvento = () => {
+    setMostrandoFormEvento(false)
+    cargarDatos()
+    if (onRecargar) onRecargar()
+  }
+
+  if (mostrandoFormObs) {
+    return (
+      <NestObservationForm
+        nidoId={nidoId}
+        onCrear={handleCrearObservacion}
+        onCerrar={() => setMostrandoFormObs(false)}
+      />
+    )
+  }
+
+  if (mostrandoFormEvento) {
+    return (
+      <NestEventForm
+        nidoId={nidoId}
+        estadoActual={detalle ? detalle.estado : ''}
+        onCrear={handleCrearEvento}
+        onCerrar={() => setMostrandoFormEvento(false)}
+      />
+    )
+  }
 
   return (
     <div className="panel-overlay" onClick={onCerrar}>
@@ -190,7 +236,7 @@ export default function NestDetailPanel({ nidoId, onCerrar }) {
               </Seccion>
 
               {observaciones.length > 0 && (
-                <Seccion titulo={`Última observación`}>
+                <Seccion titulo="Última observación">
                   <table className="panel-tabla">
                     <tbody>
                       <tr>
@@ -227,10 +273,26 @@ export default function NestDetailPanel({ nidoId, onCerrar }) {
               )}
 
               <Seccion titulo="Histórico de observaciones">
+                {puedeCrear && (
+                  <button
+                    className="panel-boton-nuevo"
+                    onClick={() => setMostrandoFormObs(true)}
+                  >
+                    + Nueva observación
+                  </button>
+                )}
                 <NestObservationsHistory observaciones={observaciones} />
               </Seccion>
 
               <Seccion titulo="Histórico de eventos">
+                {puedeCrear && (
+                  <button
+                    className="panel-boton-nuevo"
+                    onClick={() => setMostrandoFormEvento(true)}
+                  >
+                    + Nuevo evento
+                  </button>
+                )}
                 <NestEventsHistory eventos={eventos} />
               </Seccion>
 

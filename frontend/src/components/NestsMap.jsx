@@ -4,7 +4,9 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { getNidosMapa } from '../api/nidos'
 import { formatoFecha, textoEstado, colorEstado } from '../utils/date'
+import { useAuth } from '../context/AuthContext'
 import NestDetailPanel from './NestDetailPanel'
+import NestCreateForm from './NestCreateForm'
 
 const CENTRO_ANDORRA = [42.5063, 1.5218]
 const ANDORRA_BOUNDS = L.latLngBounds([42.42, 1.40], [42.66, 1.79])
@@ -37,6 +39,14 @@ function crearIcono(color, size) {
     popupAnchor: [0, -half],
   })
 }
+
+const ICONO_UBICACION = L.divIcon({
+  className: 'nest-marker',
+  html: '<div class="ubicacion-temporal"></div>',
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
+  popupAnchor: [0, -12],
+})
 
 function NestPopup({ nido, onVerFicha }) {
   const foto = nido.foto_principal
@@ -99,12 +109,14 @@ function NestPopup({ nido, onVerFicha }) {
   )
 }
 
-function Marcadores({ nidos, zoom, onSeleccionar, onVerFicha }) {
+function Marcadores({ nidos, zoom, onSeleccionar, onVerFicha, seleccionandoUbicacion }) {
   const handleClick = useCallback((nido) => {
     if (esMovil()) {
       onSeleccionar(nido)
     }
   }, [onSeleccionar])
+
+  if (seleccionandoUbicacion) return null
 
   return nidos.map((nido) => (
     <Marker
@@ -120,6 +132,16 @@ function Marcadores({ nidos, zoom, onSeleccionar, onVerFicha }) {
       )}
     </Marker>
   ))
+}
+
+function LocationPicker({ activo, onUbicacion }) {
+  useMapEvents({
+    click(e) {
+      if (!activo) return
+      onUbicacion({ lat: parseFloat(e.latlng.lat.toFixed(6)), lng: parseFloat(e.latlng.lng.toFixed(6)) })
+    },
+  })
+  return null
 }
 
 function ZoomTracker({ onZoomChange }) {
@@ -205,12 +227,25 @@ function FichaNido({ nido, onCerrar, onVerFicha }) {
 }
 
 function NestsMap({ sidebarAbierto }) {
+  const { usuario } = useAuth()
   const [nidos, setNidos] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
   const [zoom, setZoom] = useState(12)
   const [nidoSeleccionado, setNidoSeleccionado] = useState(null)
   const [nidoDetalleId, setNidoDetalleId] = useState(null)
+  const [mostrandoFormulario, setMostrandoFormulario] = useState(false)
+  const [seleccionandoUbicacion, setSeleccionandoUbicacion] = useState(false)
+  const [ubicacionTemporal, setUbicacionTemporal] = useState(null)
+
+  const puedeCrear = usuario && (usuario.rol === 'admin' || usuario.rol === 'bander')
+
+  const recargarNidos = useCallback(() => {
+    getNidosMapa()
+      .then(setNidos)
+      .catch(() => setError('No se han podido cargar los nidos.'))
+    setNidoSeleccionado(null)
+  }, [])
 
   useEffect(() => {
     getNidosMapa()
@@ -218,6 +253,18 @@ function NestsMap({ sidebarAbierto }) {
       .catch(() => setError('No se han podido cargar los nidos.'))
       .finally(() => setCargando(false))
   }, [])
+
+  const handleCrearNido = (nuevo) => {
+    setMostrandoFormulario(false)
+    setSeleccionandoUbicacion(false)
+    setUbicacionTemporal(null)
+    recargarNidos()
+  }
+
+  const handleUbicacionSeleccionada = (punto) => {
+    setUbicacionTemporal(punto)
+    setSeleccionandoUbicacion(false)
+  }
 
   if (cargando) {
     return (
@@ -253,20 +300,45 @@ function NestsMap({ sidebarAbierto }) {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        <LocationPicker
+          activo={seleccionandoUbicacion}
+          onUbicacion={handleUbicacionSeleccionada}
+        />
         {nidos.length > 0 && (
           <Marcadores
             nidos={nidos}
             zoom={zoom}
             onSeleccionar={setNidoSeleccionado}
             onVerFicha={setNidoDetalleId}
+            seleccionandoUbicacion={seleccionandoUbicacion}
+          />
+        )}
+        {ubicacionTemporal && (
+          <Marker
+            position={[ubicacionTemporal.lat, ubicacionTemporal.lng]}
+            icon={ICONO_UBICACION}
           />
         )}
       </MapContainer>
+
       {nidos.length === 0 && (
         <div className="mapa-sin-nidos">
           <p>No hay nidos registrados.</p>
         </div>
       )}
+
+      {seleccionandoUbicacion && (
+        <div className="mapa-aviso-seleccion">
+          Haz clic en el mapa para seleccionar la ubicación del nido
+        </div>
+      )}
+
+      {puedeCrear && !mostrandoFormulario && (
+        <button className="mapa-boton-nuevo" onClick={() => setMostrandoFormulario(true)}>
+          + Nuevo nido
+        </button>
+      )}
+
       <FichaNido
         nido={nidoSeleccionado}
         onCerrar={() => setNidoSeleccionado(null)}
@@ -279,6 +351,24 @@ function NestsMap({ sidebarAbierto }) {
         <NestDetailPanel
           nidoId={nidoDetalleId}
           onCerrar={() => setNidoDetalleId(null)}
+          onRecargar={recargarNidos}
+        />
+      )}
+      {mostrandoFormulario && (
+        <NestCreateForm
+          onCrear={handleCrearNido}
+          onCerrar={() => {
+            setMostrandoFormulario(false)
+            setSeleccionandoUbicacion(false)
+            setUbicacionTemporal(null)
+          }}
+          onIniciarSeleccion={() => setSeleccionandoUbicacion(true)}
+          onCancelarSeleccion={() => {
+            setSeleccionandoUbicacion(false)
+            setUbicacionTemporal(null)
+          }}
+          seleccionandoUbicacion={seleccionandoUbicacion}
+          ubicacionTemporal={ubicacionTemporal}
         />
       )}
     </div>

@@ -569,6 +569,15 @@
   justify-content: flex-end;
 }
 
+.panel-overlay--transparente {
+  background: transparent;
+  pointer-events: none;
+}
+
+.panel-overlay--transparente .panel-lateral {
+  pointer-events: auto;
+}
+
 .panel-lateral {
   width: min(600px, 42vw);
   min-width: 400px;
@@ -832,6 +841,240 @@
   font-size: 0.85rem;
   font-style: italic;
   margin: 0;
+}
+
+/* Botón nuevo nido sobre mapa */
+
+.mapa-boton-nuevo {
+  position: absolute;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 1000;
+  background: #1f5c3b;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.65rem 1.1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  transition: background 0.15s;
+}
+
+.mapa-boton-nuevo:hover {
+  background: #244a36;
+}
+
+/* Aviso selección ubicación */
+
+.mapa-aviso-seleccion {
+  position: absolute;
+  top: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  background: #e67e22;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* Marcador temporal de ubicación */
+
+.ubicacion-temporal {
+  width: 20px;
+  height: 20px;
+  background: #e67e22;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px #e67e22, 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Formularios */
+
+.form-nido {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.form-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.form-campo label {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #555;
+}
+
+.form-campo input[type="text"],
+.form-campo input[type="number"],
+.form-campo input[type="date"],
+.form-campo input[type="datetime-local"],
+.form-campo select,
+.form-campo textarea {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-campo input:focus,
+.form-campo select:focus,
+.form-campo textarea:focus {
+  border-color: #2f7d4f;
+}
+
+.form-campo textarea {
+  resize: vertical;
+}
+
+.form-fila {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.form-campo--mitad {
+  flex: 1;
+}
+
+.form-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.form-checkbox-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.form-texto-fijo {
+  padding: 0.6rem 0.75rem;
+  background: #f0f2ef;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.form-boton-mapa {
+  width: 100%;
+  padding: 0.6rem;
+  background: #e67e22;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.form-boton-mapa:hover {
+  background: #d35400;
+}
+
+.form-aviso-mapa {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  background: #fef3e2;
+  border: 1px solid #e67e22;
+  border-radius: 6px;
+  color: #b8600e;
+  font-size: 0.82rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.form-error {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  background: #fdecea;
+  border: 1px solid #e74c3c;
+  border-radius: 6px;
+  color: #c0392b;
+  font-size: 0.85rem;
+}
+
+.form-acciones {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.form-boton-cancelar {
+  flex: 1;
+  padding: 0.65rem;
+  background: #f0f0f0;
+  color: #555;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.form-boton-cancelar:hover {
+  background: #e0e0e0;
+}
+
+.form-boton-guardar {
+  flex: 1;
+  padding: 0.65rem;
+  background: #1f5c3b;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.form-boton-guardar:hover {
+  background: #244a36;
+}
+
+.form-boton-guardar:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+}
+
+/* Botón nuevo dentro del panel */
+
+.panel-boton-nuevo {
+  display: inline-block;
+  margin-bottom: 0.6rem;
+  padding: 0.4rem 0.8rem;
+  background: #1f5c3b;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.panel-boton-nuevo:hover {
+  background: #244a36;
 }
 
 /* Responsive móvil */
