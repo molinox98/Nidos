@@ -7,6 +7,7 @@ import { formatoFecha, textoEstado, colorEstado } from '../utils/date'
 import { useAuth } from '../context/AuthContext'
 import NestDetailPanel from './NestDetailPanel'
 import NestCreateForm from './NestCreateForm'
+import NestGroupCreateForm from './NestGroupCreateForm'
 
 const CENTRO_ANDORRA = [42.5063, 1.5218]
 const ANDORRA_BOUNDS = L.latLngBounds([42.42, 1.40], [42.66, 1.79])
@@ -48,90 +49,178 @@ const ICONO_UBICACION = L.divIcon({
   popupAnchor: [0, -12],
 })
 
-function NestPopup({ nido, onVerFicha }) {
-  const foto = nido.foto_principal
+const ORDEN_ESTADO = { destruido: 0, retirado: 1, inactivo: 2, activo: 3 }
+
+function peorEstado(nidos) {
+  let peor = 'activo'
+  for (const n of nidos) {
+    const e = n.estado || 'activo'
+    if (ORDEN_ESTADO[e] < ORDEN_ESTADO[peor]) peor = e
+  }
+  return peor
+}
+
+function agruparNidos(nidos) {
+  const grupos = {}
+  const sueltos = []
+
+  for (const n of nidos) {
+    if (n.grupo_nido) {
+      const key = n.grupo_nido
+      if (!grupos[key]) {
+        grupos[key] = {
+          key: `grupo-${key}`,
+          tipo: 'grupo',
+          nombre: n.grupo_nombre,
+          lat: parseFloat(n.latitud),
+          lng: parseFloat(n.longitud),
+          nidos: [],
+        }
+      }
+      grupos[key].nidos.push(n)
+    } else {
+      sueltos.push({
+        key: `solo-${n.id}`,
+        tipo: 'solo',
+        nombre: n.nombre,
+        lat: parseFloat(n.latitud),
+        lng: parseFloat(n.longitud),
+        nidos: [n],
+      })
+    }
+  }
+
+  return [...Object.values(grupos), ...sueltos]
+}
+
+function crearIconoGrupo(color, size, count) {
+  const half = Math.round(size / 2)
+  return L.divIcon({
+    className: 'nest-marker',
+    html: `<div class="nest-marker-grupo" style="background-color: ${color}; width: ${size}px; height: ${size}px; font-size: ${Math.max(10, Math.round(size * 0.55))}px;">${count}</div>`,
+    iconSize: [size, size],
+    iconAnchor: [half, half],
+    popupAnchor: [0, -half],
+  })
+}
+
+function NestPopupContent({ elemento, onVerFicha }) {
+  const [indice, setIndice] = useState(0)
+  const nidos = elemento.nidos
+  const current = nidos[indice]
+  const foto = current.foto_principal
+
+  const anterior = (e) => {
+    e.stopPropagation()
+    e.preventDefault()
+    setIndice((indice - 1 + nidos.length) % nidos.length)
+  }
+
+  const siguiente = (e) => {
+    e.stopPropagation()
+    e.preventDefault()
+    setIndice((indice + 1) % nidos.length)
+  }
+
   return (
     <div className="nest-popup">
       {foto && (
-        <img src={foto} alt={nido.nombre} className="nest-popup-foto" />
+        <img src={foto} alt={current.nombre} className="nest-popup-foto" />
       )}
-      <h3 className="nest-popup-nombre">{nido.nombre}</h3>
+      <h3 className="nest-popup-nombre">{current.nombre}</h3>
+
+      {nidos.length > 1 && (
+        <div className="nest-popup-navegacion">
+          <button className="nest-popup-flecha" onClick={anterior}>←</button>
+          <span className="nest-popup-posicion">Nido {indice + 1} de {nidos.length}</span>
+          <button className="nest-popup-flecha" onClick={siguiente}>→</button>
+        </div>
+      )}
+
       <table className="nest-popup-tabla">
         <tbody>
           <tr>
             <td className="nest-popup-label">Estado</td>
-            <td style={{ color: colorEstado(nido.estado), fontWeight: 600 }}>
-              {textoEstado(nido.estado)}
+            <td style={{ color: colorEstado(current.estado), fontWeight: 600 }}>
+              {textoEstado(current.estado)}
             </td>
           </tr>
-          {nido.grupo_nombre && (
+          {current.grupo_nombre && (
             <tr>
               <td className="nest-popup-label">Grupo</td>
-              <td>{nido.grupo_nombre}{nido.codigo_en_grupo ? ` (${nido.codigo_en_grupo})` : ''}</td>
+              <td>{current.grupo_nombre}{current.codigo_en_grupo ? ` (${current.codigo_en_grupo})` : ''}</td>
             </tr>
           )}
-          {nido.posicion_en_grupo && (
+          {current.posicion_en_grupo && (
             <tr>
               <td className="nest-popup-label">Posición</td>
-              <td>{nido.posicion_en_grupo}</td>
+              <td>{current.posicion_en_grupo}</td>
             </tr>
           )}
-          {nido.especie_ultima_observacion && (
+          {current.especie_ultima_observacion && (
             <tr>
               <td className="nest-popup-label">Especie</td>
-              <td>{nido.especie_ultima_observacion}</td>
+              <td>{current.especie_ultima_observacion}</td>
             </tr>
           )}
           <tr>
             <td className="nest-popup-label">Ocupado</td>
-            <td>{nido.ocupado ? 'Sí' : 'No'}</td>
+            <td>{current.ocupado ? 'Sí' : 'No'}</td>
           </tr>
           <tr>
             <td className="nest-popup-label">Huevos</td>
-            <td>{nido.hay_huevos ? nido.cantidad_huevos : 'No'}</td>
+            <td>{current.hay_huevos ? current.cantidad_huevos : 'No'}</td>
           </tr>
           <tr>
             <td className="nest-popup-label">Polluelos</td>
-            <td>{nido.hay_polluelos ? nido.cantidad_polluelos : 'No'}</td>
+            <td>{current.hay_polluelos ? current.cantidad_polluelos : 'No'}</td>
           </tr>
-          {nido.ultima_observacion?.fecha_observacion && (
+          {current.ultima_observacion?.fecha_observacion && (
             <tr>
               <td className="nest-popup-label">Última observación</td>
-              <td>{formatoFecha(nido.ultima_observacion.fecha_observacion)}</td>
+              <td>{formatoFecha(current.ultima_observacion.fecha_observacion)}</td>
             </tr>
           )}
         </tbody>
       </table>
-      <button className="nest-popup-ver-ficha" onClick={() => onVerFicha(nido.id)}>
+      <button className="nest-popup-ver-ficha" onClick={() => onVerFicha(current.id)}>
         Ver ficha
       </button>
     </div>
   )
 }
 
-function Marcadores({ nidos, zoom, onSeleccionar, onVerFicha, seleccionandoUbicacion }) {
-  const handleClick = useCallback((nido) => {
-    if (esMovil()) {
-      onSeleccionar(nido)
+function Marcadores({ elementos, zoom, onSeleccionar, onVerFicha, seleccionandoUbicacion, seleccionandoUbicacionGrupo }) {
+  const handleClick = useCallback((elemento) => {
+    if (esMovil() && elemento.nidos.length > 0) {
+      onSeleccionar(elemento.nidos[0])
     }
   }, [onSeleccionar])
 
-  if (seleccionandoUbicacion) return null
+  if (seleccionandoUbicacion || seleccionandoUbicacionGrupo) return null
 
-  return nidos.map((nido) => (
-    <Marker
-      key={nido.id}
-      position={[parseFloat(nido.latitud), parseFloat(nido.longitud)]}
-      icon={crearIcono(colorEstado(nido.estado), tamañoMarcador(zoom))}
-      eventHandlers={esMovil() ? { click: () => handleClick(nido) } : undefined}
-    >
-      {!esMovil() && (
-        <Popup maxWidth={300}>
-          <NestPopup nido={nido} onVerFicha={onVerFicha} />
-        </Popup>
-      )}
-    </Marker>
-  ))
+  return elementos.map((elemento) => {
+    const count = elemento.nidos.length
+    const esGrupo = elemento.tipo === 'grupo'
+    const color = esGrupo ? colorEstado(peorEstado(elemento.nidos)) : colorEstado(elemento.nidos[0].estado)
+    const size = esGrupo ? Math.max(18, tamañoMarcador(zoom)) : tamañoMarcador(zoom)
+    const icon = esGrupo ? crearIconoGrupo(color, size, count) : crearIcono(color, size)
+
+    return (
+      <Marker
+        key={elemento.key}
+        position={[elemento.lat, elemento.lng]}
+        icon={icon}
+        eventHandlers={esMovil() ? { click: () => handleClick(elemento) } : undefined}
+      >
+        {!esMovil() && (
+          <Popup maxWidth={300}>
+            <NestPopupContent elemento={elemento} onVerFicha={onVerFicha} />
+          </Popup>
+        )}
+      </Marker>
+    )
+  })
 }
 
 function LocationPicker({ activo, onUbicacion }) {
@@ -235,8 +324,13 @@ function NestsMap({ sidebarAbierto }) {
   const [nidoSeleccionado, setNidoSeleccionado] = useState(null)
   const [nidoDetalleId, setNidoDetalleId] = useState(null)
   const [mostrandoFormulario, setMostrandoFormulario] = useState(false)
+  const [mostrandoFormularioGrupo, setMostrandoFormularioGrupo] = useState(false)
   const [seleccionandoUbicacion, setSeleccionandoUbicacion] = useState(false)
+  const [seleccionandoUbicacionGrupo, setSeleccionandoUbicacionGrupo] = useState(false)
   const [ubicacionTemporal, setUbicacionTemporal] = useState(null)
+  const [ubicacionTemporalGrupo, setUbicacionTemporalGrupo] = useState(null)
+
+  const elementos = agruparNidos(nidos)
 
   const puedeCrear = usuario && (usuario.rol === 'admin' || usuario.rol === 'bander')
 
@@ -261,11 +355,22 @@ function NestsMap({ sidebarAbierto }) {
     recargarNidos()
   }
 
+  const handleCrearGrupo = (nuevoGrupo) => {
+    setMostrandoFormularioGrupo(false)
+    setSeleccionandoUbicacionGrupo(false)
+    setUbicacionTemporalGrupo(null)
+    recargarNidos()
+  }
+
   const handleUbicacionSeleccionada = (punto) => {
     setUbicacionTemporal(punto)
     setSeleccionandoUbicacion(false)
   }
 
+  const handleUbicacionGrupoSeleccionada = (punto) => {
+    setUbicacionTemporalGrupo(punto)
+    setSeleccionandoUbicacionGrupo(false)
+  }
   if (cargando) {
     return (
       <div className="mapa-estado">
@@ -304,18 +409,29 @@ function NestsMap({ sidebarAbierto }) {
           activo={seleccionandoUbicacion}
           onUbicacion={handleUbicacionSeleccionada}
         />
+        <LocationPicker
+          activo={seleccionandoUbicacionGrupo}
+          onUbicacion={handleUbicacionGrupoSeleccionada}
+        />
         {nidos.length > 0 && (
           <Marcadores
-            nidos={nidos}
+            elementos={elementos}
             zoom={zoom}
             onSeleccionar={setNidoSeleccionado}
             onVerFicha={setNidoDetalleId}
             seleccionandoUbicacion={seleccionandoUbicacion}
+            seleccionandoUbicacionGrupo={seleccionandoUbicacionGrupo}
           />
         )}
         {ubicacionTemporal && (
           <Marker
             position={[ubicacionTemporal.lat, ubicacionTemporal.lng]}
+            icon={ICONO_UBICACION}
+          />
+        )}
+        {ubicacionTemporalGrupo && (
+          <Marker
+            position={[ubicacionTemporalGrupo.lat, ubicacionTemporalGrupo.lng]}
             icon={ICONO_UBICACION}
           />
         )}
@@ -333,10 +449,21 @@ function NestsMap({ sidebarAbierto }) {
         </div>
       )}
 
-      {puedeCrear && !mostrandoFormulario && (
-        <button className="mapa-boton-nuevo" onClick={() => setMostrandoFormulario(true)}>
-          + Nuevo nido
-        </button>
+      {seleccionandoUbicacionGrupo && (
+        <div className="mapa-aviso-seleccion">
+          Haz clic en el mapa para seleccionar la ubicación del grupo
+        </div>
+      )}
+
+      {puedeCrear && !mostrandoFormulario && !mostrandoFormularioGrupo && (
+        <div className="mapa-botones-flotantes">
+          <button className="mapa-boton-nuevo" onClick={() => setMostrandoFormularioGrupo(true)}>
+            + Nuevo grupo
+          </button>
+          <button className="mapa-boton-nuevo" onClick={() => setMostrandoFormulario(true)}>
+            + Nuevo nido
+          </button>
+        </div>
       )}
 
       <FichaNido
@@ -369,6 +496,23 @@ function NestsMap({ sidebarAbierto }) {
           }}
           seleccionandoUbicacion={seleccionandoUbicacion}
           ubicacionTemporal={ubicacionTemporal}
+        />
+      )}
+      {mostrandoFormularioGrupo && (
+        <NestGroupCreateForm
+          onCrear={handleCrearGrupo}
+          onCerrar={() => {
+            setMostrandoFormularioGrupo(false)
+            setSeleccionandoUbicacionGrupo(false)
+            setUbicacionTemporalGrupo(null)
+          }}
+          onIniciarSeleccionGrupo={() => setSeleccionandoUbicacionGrupo(true)}
+          onCancelarSeleccionGrupo={() => {
+            setSeleccionandoUbicacionGrupo(false)
+            setUbicacionTemporalGrupo(null)
+          }}
+          seleccionandoUbicacionGrupo={seleccionandoUbicacionGrupo}
+          ubicacionTemporalGrupo={ubicacionTemporalGrupo}
         />
       )}
     </div>

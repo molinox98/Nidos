@@ -366,6 +366,54 @@
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
 }
 
+/* Marcador numérico de grupo */
+
+.nest-marker-grupo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  color: #fff;
+  font-weight: 700;
+  line-height: 1;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Navegación en popup de grupo */
+
+.nest-popup-navegacion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  gap: 0.4rem;
+}
+
+.nest-popup-flecha {
+  background: #f0f2ef;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.15rem 0.45rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  transition: background 0.15s;
+  color: #333;
+}
+
+.nest-popup-flecha:hover {
+  background: #e0e4e0;
+}
+
+.nest-popup-posicion {
+  font-size: 0.8rem;
+  color: #555;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 .mapa-estado {
   display: flex;
   align-items: center;
@@ -845,11 +893,17 @@
 
 /* Botón nuevo nido sobre mapa */
 
-.mapa-boton-nuevo {
+.mapa-botones-flotantes {
   position: absolute;
   bottom: 1.5rem;
   right: 1.5rem;
   z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mapa-boton-nuevo {
   background: #1f5c3b;
   color: #fff;
   border: none;
@@ -1075,6 +1129,54 @@
 
 .panel-boton-nuevo:hover {
   background: #244a36;
+}
+
+/* === Formulario grupo === */
+
+.form-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.form-grupo-seccion {
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.form-grupo-seccion:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.form-grupo-seccion-titulo {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  color: #24302a;
+  font-weight: 600;
+}
+
+.form-grupo-ayuda {
+  margin: 0.25rem 0 0;
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.form-grupo-nido-card {
+  background: #f8faf8;
+  border: 1px solid #e8ece8;
+  border-radius: 8px;
+  padding: 0.85rem;
+  margin-bottom: 0.75rem;
+}
+
+.form-grupo-nido-card-titulo {
+  margin: 0 0 0.6rem;
+  font-size: 0.9rem;
+  color: #1f5c3b;
+  font-weight: 600;
 }
 
 /* Responsive móvil */
