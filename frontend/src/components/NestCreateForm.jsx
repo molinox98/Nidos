@@ -22,7 +22,7 @@ function hoyISO() {
   return new Date().toISOString().split('T')[0]
 }
 
-export default function NestCreateForm({ onCrear, onCerrar, onIniciarSeleccion, onCancelarSeleccion, seleccionandoUbicacion, ubicacionTemporal }) {
+export default function NestCreateForm({ onCrear, onCerrar, onIniciarSeleccion, onCancelarSeleccion, seleccionandoUbicacion, ubicacionTemporal, ocultoMovil }) {
   const [nombre, setNombre] = useState('')
   const [latitud, setLatitud] = useState('')
   const [longitud, setLongitud] = useState('')
@@ -83,7 +83,7 @@ export default function NestCreateForm({ onCrear, onCerrar, onIniciarSeleccion, 
   }
 
   return (
-    <div className={`panel-overlay ${seleccionandoUbicacion ? 'panel-overlay--transparente' : ''}`} onClick={seleccionandoUbicacion ? undefined : onCerrar}>
+    <div className={`panel-overlay ${ocultoMovil ? 'panel-overlay--oculto-movil' : seleccionandoUbicacion ? 'panel-overlay--transparente' : ''}`} onClick={seleccionandoUbicacion ? undefined : onCerrar}>
       <div className="panel-lateral" onClick={(e) => e.stopPropagation()}>
         <div className="panel-cabecera">
           <h3 className="panel-titulo">Nuevo nido</h3>

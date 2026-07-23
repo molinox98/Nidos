@@ -35,6 +35,7 @@ export default function NestGroupCreateForm({
   onCrear, onCerrar,
   onIniciarSeleccionGrupo, onCancelarSeleccionGrupo,
   seleccionandoUbicacionGrupo, ubicacionTemporalGrupo,
+  ocultoMovil,
 }) {
   const [grupoNombre, setGrupoNombre] = useState('')
   const [tipoUbicacion, setTipoUbicacion] = useState('otro')
@@ -154,7 +155,7 @@ export default function NestGroupCreateForm({
 
   return (
     <div
-      className={`panel-overlay ${seleccionandoUbicacionGrupo ? 'panel-overlay--transparente' : ''}`}
+      className={`panel-overlay ${ocultoMovil ? 'panel-overlay--oculto-movil' : seleccionandoUbicacionGrupo ? 'panel-overlay--transparente' : ''}`}
       onClick={seleccionandoUbicacionGrupo ? undefined : onCerrar}
     >
       <div className="panel-lateral" onClick={(e) => e.stopPropagation()}>

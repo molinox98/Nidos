@@ -345,6 +345,16 @@ function NestsMap({ sidebarAbierto }) {
   const [ubicacionTemporal, setUbicacionTemporal] = useState(null)
   const [ubicacionTemporalGrupo, setUbicacionTemporalGrupo] = useState(null)
 
+  // DETECCIÓN REACTIVA DE DISPOSITIVO MÓVIL
+  const [esMovil, setEsMovil] = useState(() =>
+    typeof window !== 'undefined' && window.innerWidth <= ANCHO_MOVIL
+  )
+  useEffect(() => {
+    const handler = () => setEsMovil(window.innerWidth <= ANCHO_MOVIL)
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
+
   const elementos = agruparNidos(nidos)
 
   const puedeCrear = usuario && (usuario.rol === 'admin' || usuario.rol === 'bander')
@@ -461,15 +471,38 @@ function NestsMap({ sidebarAbierto }) {
         </div>
       )}
 
+      {/* AVISO FLOTANTE DE COORDENADAS Y BOTÓN CANCELAR */}
       {seleccionandoUbicacion && (
         <div className="mapa-aviso-seleccion">
-          Haz clic en el mapa para seleccionar la ubicación del nido
+          <span>{esMovil ? 'Toca el mapa para seleccionar la ubicación del nido' : 'Haz clic en el mapa para seleccionar la ubicación del nido'}</span>
+          {esMovil && (
+            <button
+              className="mapa-boton-cancelar-seleccion"
+              onClick={() => {
+                setSeleccionandoUbicacion(false)
+                setUbicacionTemporal(null)
+              }}
+            >
+              Cancelar selección
+            </button>
+          )}
         </div>
       )}
 
       {seleccionandoUbicacionGrupo && (
         <div className="mapa-aviso-seleccion">
-          Haz clic en el mapa para seleccionar la ubicación del grupo
+          <span>{esMovil ? 'Toca el mapa para seleccionar la ubicación del grupo' : 'Haz clic en el mapa para seleccionar la ubicación del grupo'}</span>
+          {esMovil && (
+            <button
+              className="mapa-boton-cancelar-seleccion"
+              onClick={() => {
+                setSeleccionandoUbicacionGrupo(false)
+                setUbicacionTemporalGrupo(null)
+              }}
+            >
+              Cancelar selección
+            </button>
+          )}
         </div>
       )}
 
@@ -514,6 +547,7 @@ function NestsMap({ sidebarAbierto }) {
           }}
           seleccionandoUbicacion={seleccionandoUbicacion}
           ubicacionTemporal={ubicacionTemporal}
+          ocultoMovil={esMovil && seleccionandoUbicacion}
         />
       )}
       {mostrandoFormularioGrupo && (
@@ -531,6 +565,7 @@ function NestsMap({ sidebarAbierto }) {
           }}
           seleccionandoUbicacionGrupo={seleccionandoUbicacionGrupo}
           ubicacionTemporalGrupo={ubicacionTemporalGrupo}
+          ocultoMovil={esMovil && seleccionandoUbicacionGrupo}
         />
       )}
     </div>
