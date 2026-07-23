@@ -8,7 +8,6 @@ class ImagenNidoSerializer(serializers.ModelSerializer):
     usuario_nombre = serializers.CharField(
         source='usuario.nombre', read_only=True, default=None,
     )
-    archivo = serializers.SerializerMethodField()
     archivo_url = serializers.SerializerMethodField()
 
     class Meta:
@@ -19,11 +18,6 @@ class ImagenNidoSerializer(serializers.ModelSerializer):
             'fecha_subida',
         ]
         read_only_fields = ['id', 'usuario', 'fecha_subida']
-
-    def get_archivo(self, obj):
-        if obj.archivo:
-            return obj.archivo.name
-        return None
 
     def get_archivo_url(self, obj):
         if obj.archivo:

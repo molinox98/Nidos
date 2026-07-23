@@ -884,6 +884,49 @@
   font-weight: 600;
 }
 
+/* Botón marcar principal en galería */
+
+.panel-galeria-boton-principal {
+  display: inline-block;
+  margin-top: 0.25rem;
+  padding: 0.2rem 0.5rem;
+  background: #e67e22;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.panel-galeria-boton-principal:hover {
+  background: #d35400;
+}
+
+/* Formulario subida imagen inline */
+
+.form-subida-imagen {
+  background: #f8faf8;
+  border: 1px solid #e8ece8;
+  border-radius: 8px;
+  padding: 0.85rem;
+  margin-bottom: 0.75rem;
+}
+
+.form-subida-titulo {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  color: #24302a;
+  font-weight: 600;
+}
+
+.form-subida-imagen input[type="file"] {
+  width: 100%;
+  font-size: 0.85rem;
+  font-family: inherit;
+}
+
 .panel-vacio {
   color: #999;
   font-size: 0.85rem;
@@ -1254,6 +1297,11 @@
 
   .panel-galeria {
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+
+  .panel-galeria-boton-principal {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
   }
 
   .mapa-aviso-seleccion {

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { getNidoDetalle } from '../api/nidos'
 import { getObservaciones } from '../api/observaciones'
 import { getEventos } from '../api/eventos'
-import { getImagenes } from '../api/imagenes'
+import { getImagenes, marcarImagenPrincipal } from '../api/imagenes'
 import { formatoFecha, textoEstado, colorEstado } from '../utils/date'
 import { useAuth } from '../context/AuthContext'
 import NestObservationsHistory from './NestObservationsHistory'
@@ -10,6 +10,7 @@ import NestEventsHistory from './NestEventsHistory'
 import NestImagesGallery from './NestImagesGallery'
 import NestObservationForm from './NestObservationForm'
 import NestEventForm from './NestEventForm'
+import NestImageUploadForm from './NestImageUploadForm'
 
 const METODO_UBICACION_TEXTO = {
   manual_mapa: 'Mapa',
@@ -53,6 +54,7 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar }) {
   const [imagenes, setImagenes] = useState([])
   const [mostrandoFormObs, setMostrandoFormObs] = useState(false)
   const [mostrandoFormEvento, setMostrandoFormEvento] = useState(false)
+  const [mostrandoFormImg, setMostrandoFormImg] = useState(false)
 
   const puedeCrear = usuario && (usuario.rol === 'admin' || usuario.rol === 'bander')
 
@@ -108,6 +110,24 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar }) {
     setMostrandoFormEvento(false)
     cargarDatos()
     if (onRecargar) onRecargar()
+  }
+
+  // RECARGA TRAS SUBIDA O MARCAR PRINCIPAL
+  const handleCrearImagen = () => {
+    setMostrandoFormImg(false)
+    cargarDatos()
+    if (onRecargar) onRecargar()
+  }
+
+  const handleMarcarPrincipal = async (imagenId) => {
+    try {
+      await marcarImagenPrincipal(imagenId)
+      cargarDatos()
+      if (onRecargar) onRecargar()
+    } catch {
+      // ERROR SILENCIOSO, RECARGA DE TODOS MODOS
+      cargarDatos()
+    }
   }
 
   if (mostrandoFormObs) {
@@ -299,7 +319,26 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar }) {
               </Seccion>
 
               <Seccion titulo="Imágenes">
-                <NestImagesGallery imagenes={imagenes} />
+                {puedeCrear && (
+                  <button
+                    className="panel-boton-nuevo"
+                    onClick={() => setMostrandoFormImg(true)}
+                  >
+                    + Añadir imagen
+                  </button>
+                )}
+                {mostrandoFormImg && (
+                  <NestImageUploadForm
+                    nidoId={nidoId}
+                    onCrear={handleCrearImagen}
+                    onCerrar={() => setMostrandoFormImg(false)}
+                  />
+                )}
+                <NestImagesGallery
+                  imagenes={imagenes}
+                  puedeEditar={puedeCrear}
+                  onMarcarPrincipal={handleMarcarPrincipal}
+                />
               </Seccion>
             </>
           )}

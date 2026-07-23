@@ -1,7 +1,7 @@
 import { formatoFecha } from '../utils/date'
 
-// GALERÍA DE IMÁGENES DEL NIDO
-export default function NestImagesGallery({ imagenes }) {
+// ACCIONES DE GALERÍA: MARCAR PRINCIPAL
+export default function NestImagesGallery({ imagenes, puedeEditar, onMarcarPrincipal }) {
   if (!imagenes || imagenes.length === 0) {
     return <p className="panel-vacio">No hay imágenes registradas.</p>
   }
@@ -22,6 +22,14 @@ export default function NestImagesGallery({ imagenes }) {
               {img.usuario_nombre && ` · ${img.usuario_nombre}`}
             </span>
             {img.es_principal && <span className="panel-galeria-principal">Principal</span>}
+            {!img.es_principal && puedeEditar && (
+              <button
+                className="panel-galeria-boton-principal"
+                onClick={() => onMarcarPrincipal(img.id)}
+              >
+                Marcar como principal
+              </button>
+            )}
           </div>
         </div>
       ))}
