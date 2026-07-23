@@ -6,6 +6,7 @@ def ruta_imagen_nido(instance, filename):
 
 
 class ImagenNido(models.Model):
+    # IMÁGENES ASOCIADAS AL NIDO (METADATOS, NO BINARIO)
     id = models.BigAutoField(primary_key=True)
     nido = models.ForeignKey(
         'nests.Nido',

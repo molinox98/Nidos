@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.db import models
 
 
+# GESTOR DE USUARIOS PERSONALIZADO
 class UsuarioManager(BaseUserManager):
     def create_user(self, email, nombre, password=None, **extra_fields):
         if not email:
@@ -20,6 +21,7 @@ class UsuarioManager(BaseUserManager):
 
 
 class Usuario(AbstractBaseUser, PermissionsMixin):
+    # MODELO DE USUARIO PERSONALIZADO
     ROL_CHOICES = [
         ('admin', 'Administrador'),
         ('bander', 'Bander'),
@@ -27,6 +29,8 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     ]
 
     id = models.BigAutoField(primary_key=True)
+    # ROLES: ADMIN, BANDER, CONSULTA
+
     nombre = models.CharField(max_length=150)
     email = models.EmailField(unique=True)
     rol = models.CharField(max_length=20, choices=ROL_CHOICES, default='consulta')

@@ -6,6 +6,7 @@ from apps.users.models import Usuario
 User = get_user_model()
 
 
+# SERIALIZADOR BÁSICO DE USUARIO
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
@@ -13,6 +14,7 @@ class UsuarioSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
+# LOGIN POR EMAIL O NOMBRE CON VALIDACIÓN
 class CustomTokenObtainSerializer(serializers.Serializer):
     username = serializers.CharField(required=False)
     email = serializers.EmailField(required=False)

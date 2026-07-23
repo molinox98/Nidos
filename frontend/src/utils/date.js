@@ -1,9 +1,11 @@
+// FORMATEA FECHA A DD/MM/AAAA
 export function formatoFecha(fecha) {
   if (!fecha) return ''
   const [año, mes, dia] = fecha.split('T')[0].split('-')
   return `${dia}/${mes}/${año}`
 }
 
+// FORMATEA FECHA Y HORA A DD/MM/AAAA HH:MM
 export function formatoFechaHora(fecha) {
   if (!fecha) return ''
   const partes = fecha.split('T')
@@ -13,6 +15,7 @@ export function formatoFechaHora(fecha) {
   return `${dia}/${mes}/${año} ${hora}`
 }
 
+// TEXTO LEGIBLE PARA EL ESTADO DEL NIDO
 export function textoEstado(estado) {
   const mapa = {
     activo: 'Activo',
@@ -23,6 +26,7 @@ export function textoEstado(estado) {
   return mapa[estado] || estado
 }
 
+// TEXTO LEGIBLE PARA EL TIPO DE EVENTO
 export function textoTipoEvento(tipo) {
   const mapa = {
     cambio_estado: 'Cambio de estado',
@@ -34,6 +38,7 @@ export function textoTipoEvento(tipo) {
   return mapa[tipo] || tipo
 }
 
+// COLOR SEGÚN EL ESTADO DEL NIDO
 export function colorEstado(estado) {
   const mapa = {
     activo: '#27ae60',

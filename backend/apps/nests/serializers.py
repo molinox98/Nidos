@@ -3,6 +3,7 @@ from rest_framework import serializers
 from apps.nests.models import GrupoNido, Nido
 
 
+# SERIALIZADOR DE GRUPO DE NIDOS
 class GrupoNidoSerializer(serializers.ModelSerializer):
     nidos_count = serializers.IntegerField(read_only=True, default=0)
 
@@ -48,6 +49,7 @@ class ObservacionNidoMapaSerializer(serializers.Serializer):
     notas = serializers.CharField(default='')
 
 
+# SERIALIZADOR COMPACTO PARA EL MAPA (TODOS LOS CAMPOS DERIVADOS)
 class NidoMapaSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     nombre = serializers.CharField()

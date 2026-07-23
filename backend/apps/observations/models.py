@@ -2,6 +2,7 @@ from django.db import models
 
 
 class ObservacionNido(models.Model):
+    # HISTÓRICO DE OBSERVACIONES DEL NIDO
     id = models.BigAutoField(primary_key=True)
     nido = models.ForeignKey(
         'nests.Nido',

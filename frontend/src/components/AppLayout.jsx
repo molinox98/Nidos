@@ -17,6 +17,7 @@ const ROLES = {
   consulta: 'Consulta',
 }
 
+// LAYOUT PRINCIPAL CON CABECERA, SIDEBAR Y MAPA
 function AppLayout() {
   const { usuario, logout } = useAuth()
   const [seccionActiva, setSeccionActiva] = useState(null)

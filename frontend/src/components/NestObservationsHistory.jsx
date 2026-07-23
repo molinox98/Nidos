@@ -1,3 +1,4 @@
+// LISTA CRONOLÓGICA DE OBSERVACIONES DEL NIDO
 export default function NestObservationsHistory({ observaciones }) {
   if (!observaciones || observaciones.length === 0) {
     return <p className="panel-vacio">No hay observaciones registradas.</p>

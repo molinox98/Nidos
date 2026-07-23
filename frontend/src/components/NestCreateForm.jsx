@@ -17,6 +17,7 @@ const METODO_TEXTO = {
   importado: 'Importado',
 }
 
+// FECHA DE HOY EN FORMATO ISO
 function hoyISO() {
   return new Date().toISOString().split('T')[0]
 }
@@ -41,6 +42,7 @@ export default function NestCreateForm({ onCrear, onCerrar, onIniciarSeleccion, 
     }
   }, [ubicacionTemporal])
 
+  // ENVÍA EL NIDO AL BACKEND
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError(null)

@@ -8,6 +8,7 @@ export function useAuth() {
   return useContext(AuthContext)
 }
 
+// PROVEE USUARIO, AUTENTICACIÓN Y LOGIN/LOGOUT
 export function AuthProvider({ children }) {
   const [usuario, setUsuario] = useState(null)
   const [cargando, setCargando] = useState(true)

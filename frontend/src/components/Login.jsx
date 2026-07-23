@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import logo from '../assets/logo-nidos.png'
 
+// FORMULARIO DE INICIO DE SESIÓN
 export default function Login() {
   const { login } = useAuth()
   const [username, setUsername] = useState('')

@@ -3,6 +3,7 @@ from rest_framework import serializers
 from apps.events.models import EventoNido
 
 
+# SERIALIZADOR DE EVENTOS
 class EventoNidoSerializer(serializers.ModelSerializer):
     usuario_nombre = serializers.CharField(
         source='usuario.nombre', read_only=True, default=None,

@@ -33,6 +33,7 @@ function PanelError({ mensaje }) {
   )
 }
 
+// SECCIÓN COLAPSABLE CON TÍTULO EN LA FICHA
 function Seccion({ titulo, children }) {
   return (
     <div className="panel-seccion">
@@ -55,6 +56,7 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar }) {
 
   const puedeCrear = usuario && (usuario.rol === 'admin' || usuario.rol === 'bander')
 
+  // CARGA DETALLE, OBSERVACIONES, EVENTOS E IMÁGENES DEL NIDO
   const cargarDatos = () => {
     if (!nidoId) return
 

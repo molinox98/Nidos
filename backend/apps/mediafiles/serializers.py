@@ -3,6 +3,7 @@ from rest_framework import serializers
 from apps.mediafiles.models import ImagenNido
 
 
+# SERIALIZADOR DE IMÁGENES CON URL DEL ARCHIVO
 class ImagenNidoSerializer(serializers.ModelSerializer):
     usuario_nombre = serializers.CharField(
         source='usuario.nombre', read_only=True, default=None,

@@ -9,6 +9,7 @@ from apps.users.models import Usuario
 from apps.users.serializers import CustomTokenObtainSerializer, UsuarioSerializer
 
 
+# LOGIN PERSONALIZADO (EMAIL O NOMBRE + PASSWORD)
 class CustomTokenObtainView(APIView):
     permission_classes = [AllowAny]
 
@@ -34,6 +35,7 @@ class UsuarioActualView(APIView):
         return Response(serializer.data)
 
 
+# LISTADO DE USUARIOS (SOLO ADMIN)
 class UsuarioViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Usuario.objects.all().order_by('nombre')
     serializer_class = UsuarioSerializer

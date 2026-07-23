@@ -13,6 +13,7 @@ from apps.nests.serializers import (
 )
 
 
+# CRUD DE GRUPOS DE NIDOS (SOLO ADMIN/BANDER)
 class GrupoNidoViewSet(viewsets.ModelViewSet):
     serializer_class = GrupoNidoSerializer
     permission_classes = [EsAdminOBander]
@@ -23,6 +24,7 @@ class GrupoNidoViewSet(viewsets.ModelViewSet):
         ).order_by('nombre')
 
 
+# CRUD DE NIDOS (SOLO ADMIN/BANDER)
 class NidoViewSet(viewsets.ModelViewSet):
     queryset = Nido.objects.select_related('grupo_nido').order_by('nombre')
     serializer_class = NidoSerializer
@@ -38,6 +40,7 @@ class NidoViewSet(viewsets.ModelViewSet):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def mapa_nidos(request):
+    # ENDPOINT CON DATOS COMPACTOS DE NIDOS PARA EL MAPA
     nidos = Nido.objects.select_related('grupo_nido').prefetch_related(
         'observaciones__especie',
     ).all()

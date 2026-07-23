@@ -1,3 +1,4 @@
+// URL DEL BACKEND DESDE VARIABLE DE ENTORNO
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
 function getToken() {
@@ -14,6 +15,7 @@ export function clearTokens() {
   localStorage.removeItem('refresh')
 }
 
+// PETICIÓN HTTP GENÉRICA CON TOKEN JWT
 export async function apiRequest(path, options = {}) {
   const url = `${BASE_URL}${path}`
   const token = getToken()

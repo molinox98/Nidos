@@ -9,6 +9,7 @@ from apps.mediafiles.models import ImagenNido
 from apps.mediafiles.serializers import ImagenNidoSerializer
 
 
+# CRUD DE IMÁGENES CON CONTROL DE FOTO PRINCIPAL
 class ImagenNidoViewSet(viewsets.ModelViewSet):
     queryset = ImagenNido.objects.select_related(
         'nido', 'observacion', 'usuario',

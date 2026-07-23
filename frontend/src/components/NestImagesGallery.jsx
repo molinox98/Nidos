@@ -1,5 +1,6 @@
 import { formatoFecha } from '../utils/date'
 
+// GALERÍA DE IMÁGENES DEL NIDO
 export default function NestImagesGallery({ imagenes }) {
   if (!imagenes || imagenes.length === 0) {
     return <p className="panel-vacio">No hay imágenes registradas.</p>

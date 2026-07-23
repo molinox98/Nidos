@@ -3,6 +3,7 @@ from rest_framework import serializers
 from apps.observations.models import ObservacionNido
 
 
+# SERIALIZADOR DE OBSERVACIONES
 class ObservacionNidoSerializer(serializers.ModelSerializer):
     usuario_nombre = serializers.CharField(
         source='usuario.nombre', read_only=True, default=None,

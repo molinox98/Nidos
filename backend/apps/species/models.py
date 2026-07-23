@@ -2,6 +2,7 @@ from django.db import models
 
 
 class Especie(models.Model):
+    # MODELO DE ESPECIE DE AVE
     id = models.BigAutoField(primary_key=True)
     nombre_comun = models.CharField(max_length=150)
     nombre_cientifico = models.CharField(max_length=150, null=True, blank=True)

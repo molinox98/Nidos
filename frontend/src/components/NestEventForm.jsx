@@ -20,6 +20,7 @@ const ESTADO_TEXTO = {
   retirado: 'Retirado',
 }
 
+// FECHA Y HORA ACTUAL EN FORMATO LOCAL
 function ahoraLocalISO() {
   const d = new Date()
   const pad = (n) => String(n).padStart(2, '0')
@@ -34,6 +35,7 @@ export default function NestEventForm({ nidoId, estadoActual, onCrear, onCerrar 
   const [error, setError] = useState(null)
   const [guardando, setGuardando] = useState(false)
 
+  // ENVÍA EL EVENTO Y ACTUALIZA EL ESTADO DEL NIDO
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError(null)

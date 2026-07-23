@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { getEspecies } from '../api/especies'
 import { createObservacion } from '../api/observaciones'
 
+// FECHA DE HOY EN FORMATO ISO
 function hoyISO() {
   return new Date().toISOString().split('T')[0]
 }
@@ -25,6 +26,7 @@ export default function NestObservationForm({ nidoId, onCrear, onCerrar }) {
       .catch(() => {})
   }, [])
 
+  // ENVÍA LA OBSERVACIÓN AL BACKEND
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError(null)

@@ -2,6 +2,7 @@ from django.db import models
 
 
 class EventoNido(models.Model):
+    # EVENTOS DEL CICLO DE VIDA DEL NIDO
     TIPO_EVENTO_CHOICES = [
         ('cambio_estado', 'Cambio de estado'),
         ('revision', 'Revisión'),
@@ -9,6 +10,7 @@ class EventoNido(models.Model):
         ('mantenimiento', 'Mantenimiento'),
         ('otro', 'Otro'),
     ]
+    # TIPOS DE EVENTO, INCLUYE CAMBIO DE ESTADO
 
     id = models.BigAutoField(primary_key=True)
     nido = models.ForeignKey(

@@ -9,15 +9,18 @@ import NestDetailPanel from './NestDetailPanel'
 import NestCreateForm from './NestCreateForm'
 import NestGroupCreateForm from './NestGroupCreateForm'
 
+// CENTRO Y LÍMITES DEL MAPA DE ANDORRA
 const CENTRO_ANDORRA = [42.5063, 1.5218]
 const ANDORRA_BOUNDS = L.latLngBounds([42.42, 1.40], [42.66, 1.79])
 const MAP_MAX_BOUNDS = L.latLngBounds([42.25, 1.15], [42.80, 2.05])
 const ANCHO_MOVIL = 768
 
+// DETECCIÓN DE DISPOSITIVO MÓVIL
 function esMovil() {
   return typeof window !== 'undefined' && window.innerWidth <= ANCHO_MOVIL
 }
 
+// AJUSTA LA VISTA INICIAL DEL MAPA A ANDORRA
 function AjustarVista() {
   const map = useMap()
   useEffect(() => {
@@ -26,10 +29,12 @@ function AjustarVista() {
   return null
 }
 
+// TAMAÑO DEL MARCADOR SEGÚN EL NIVEL DE ZOOM
 function tamañoMarcador(zoom) {
   return Math.max(10, Math.min(24, Math.round(34 - zoom * 1.3)))
 }
 
+// MARCADOR DE PUNTO PARA NIDO SUELTO
 function crearIcono(color, size) {
   const half = Math.round(size / 2)
   return L.divIcon({
@@ -51,6 +56,7 @@ const ICONO_UBICACION = L.divIcon({
 
 const ORDEN_ESTADO = { destruido: 0, retirado: 1, inactivo: 2, activo: 3 }
 
+// DEVUELVE EL PEOR ESTADO ENTRE VARIOS NIDOS
 function peorEstado(nidos) {
   let peor = 'activo'
   for (const n of nidos) {
@@ -60,6 +66,7 @@ function peorEstado(nidos) {
   return peor
 }
 
+// AGRUPACIÓN DE NIDOS POR GRUPO PARA EL MAPA
 function agruparNidos(nidos) {
   const grupos = {}
   const sueltos = []
@@ -93,6 +100,7 @@ function agruparNidos(nidos) {
   return [...Object.values(grupos), ...sueltos]
 }
 
+// MARCADOR CON NÚMERO DE NIDOS DEL GRUPO
 function crearIconoGrupo(color, size, count) {
   const half = Math.round(size / 2)
   return L.divIcon({
@@ -104,6 +112,7 @@ function crearIconoGrupo(color, size, count) {
   })
 }
 
+// POPUP CON NAVEGACIÓN ENTRE NIDOS DE UN GRUPO
 function NestPopupContent({ elemento, onVerFicha }) {
   const [indice, setIndice] = useState(0)
   const nidos = elemento.nidos
@@ -190,6 +199,7 @@ function NestPopupContent({ elemento, onVerFicha }) {
   )
 }
 
+// MARCADORES DEL MAPA: GRUPO CON NÚMERO O NIDO SUELTO CON PUNTO
 function Marcadores({ elementos, zoom, onSeleccionar, onVerFicha, seleccionandoUbicacion, seleccionandoUbicacionGrupo }) {
   const handleClick = useCallback((elemento) => {
     if (esMovil() && elemento.nidos.length > 0) {
@@ -223,6 +233,7 @@ function Marcadores({ elementos, zoom, onSeleccionar, onVerFicha, seleccionandoU
   })
 }
 
+// CAPTURA DE UBICACIÓN MEDIANTE CLIC EN EL MAPA
 function LocationPicker({ activo, onUbicacion }) {
   useMapEvents({
     click(e) {
@@ -233,6 +244,7 @@ function LocationPicker({ activo, onUbicacion }) {
   return null
 }
 
+// NOTIFICA CAMBIOS DE ZOOM AL PADRE
 function ZoomTracker({ onZoomChange }) {
   useMapEvents({
     zoomend(e) { onZoomChange(e.target.getZoom()) },
@@ -240,6 +252,7 @@ function ZoomTracker({ onZoomChange }) {
   return null
 }
 
+// REAJUSTA EL MAPA CUANDO SE ABRE O CIERRA EL SIDEBAR
 function MapInvalidator({ sidebarAbierto }) {
   const map = useMap()
   useEffect(() => {
@@ -249,6 +262,7 @@ function MapInvalidator({ sidebarAbierto }) {
   return null
 }
 
+// OVERLAY CON FICHA RÁPIDA DEL NIDO
 function FichaNido({ nido, onCerrar, onVerFicha }) {
   if (!nido) return null
   const foto = nido.foto_principal
@@ -315,6 +329,7 @@ function FichaNido({ nido, onCerrar, onVerFicha }) {
   )
 }
 
+// COMPONENTE PRINCIPAL: MAPA CON MARCADORES, FORMULARIOS Y FICHAS
 function NestsMap({ sidebarAbierto }) {
   const { usuario } = useAuth()
   const [nidos, setNidos] = useState([])
@@ -334,6 +349,7 @@ function NestsMap({ sidebarAbierto }) {
 
   const puedeCrear = usuario && (usuario.rol === 'admin' || usuario.rol === 'bander')
 
+  // RECARGA LOS NIDOS DEL MAPA
   const recargarNidos = useCallback(() => {
     getNidosMapa()
       .then(setNidos)
@@ -348,6 +364,7 @@ function NestsMap({ sidebarAbierto }) {
       .finally(() => setCargando(false))
   }, [])
 
+  // CIERRE DEL FORMULARIO Y RECARGA TRAS CREAR NIDO
   const handleCrearNido = (nuevo) => {
     setMostrandoFormulario(false)
     setSeleccionandoUbicacion(false)
@@ -355,6 +372,7 @@ function NestsMap({ sidebarAbierto }) {
     recargarNidos()
   }
 
+  // CIERRE DEL FORMULARIO Y RECARGA TRAS CREAR GRUPO
   const handleCrearGrupo = (nuevoGrupo) => {
     setMostrandoFormularioGrupo(false)
     setSeleccionandoUbicacionGrupo(false)

@@ -2,6 +2,7 @@ from django.db import models
 
 
 class GrupoNido(models.Model):
+    # GRUPO DE NIDOS (UBICACIÓN FÍSICA)
     TIPO_UBICACION_CHOICES = [
         ('roca', 'Roca'),
         ('arbol', 'Árbol'),
@@ -30,12 +31,14 @@ class GrupoNido(models.Model):
 
 
 class Nido(models.Model):
+    # NIDO INDIVIDUAL
     ESTADO_CHOICES = [
         ('activo', 'Activo'),
         ('inactivo', 'Inactivo'),
         ('destruido', 'Destruido'),
         ('retirado', 'Retirado'),
     ]
+    # ESTADOS DEL CICLO DE VIDA DEL NIDO
 
     METODO_UBICACION_CHOICES = [
         ('manual_mapa', 'Manual mapa'),

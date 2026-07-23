@@ -1,5 +1,6 @@
 import { formatoFechaHora, textoTipoEvento, textoEstado } from '../utils/date'
 
+// LISTA CRONOLÓGICA DE EVENTOS DEL NIDO
 export default function NestEventsHistory({ eventos }) {
   if (!eventos || eventos.length === 0) {
     return <p className="panel-vacio">No hay eventos registrados.</p>

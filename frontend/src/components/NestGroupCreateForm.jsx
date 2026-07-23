@@ -10,10 +10,12 @@ const METODOS_UBICACION = ['manual_mapa', 'gps_movil', 'importado']
 const METODO_TEXTO = { manual_mapa: 'Manual (mapa)', gps_movil: 'GPS móvil', importado: 'Importado' }
 const MAX_NIDOS = 20
 
+// FECHA DE HOY EN FORMATO ISO
 function hoyISO() {
   return new Date().toISOString().split('T')[0]
 }
 
+// GENERA UN ARRAY DE NIDOS VACÍOS PARA EL GRUPO
 function crearNidosArray(nombreGrupo, cantidad) {
   const hoy = hoyISO()
   return Array.from({ length: cantidad }, (_, i) => ({
@@ -51,6 +53,7 @@ export default function NestGroupCreateForm({
     }
   }, [ubicacionTemporalGrupo])
 
+  // ACTUALIZA LA CANTIDAD DE NIDOS AL CAMBIAR EL NÚMERO
   const handleCantidadChange = (e) => {
     const val = e.target.value
     setCantidadNidos(val)
@@ -62,6 +65,7 @@ export default function NestGroupCreateForm({
     }
   }
 
+  // ACTUALIZA EL NOMBRE DE CADA NIDO AL CAMBIAR EL NOMBRE DEL GRUPO
   const handleNombreGrupoChange = (e) => {
     const nuevo = e.target.value
     setGrupoNombre(nuevo)
@@ -77,6 +81,7 @@ export default function NestGroupCreateForm({
     setNidos(prev => prev.map((n, i) => (i === index ? { ...n, [field]: value } : n)))
   }
 
+  // ENVÍA EL GRUPO Y SUS NIDOS AL BACKEND
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError(null)
