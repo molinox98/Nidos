@@ -203,7 +203,7 @@ function NestPopupContent({ elemento, onVerFicha }) {
 function Marcadores({ elementos, zoom, onSeleccionar, onVerFicha, seleccionandoUbicacion, seleccionandoUbicacionGrupo }) {
   const handleClick = useCallback((elemento) => {
     if (esMovil() && elemento.nidos.length > 0) {
-      onSeleccionar(elemento.nidos[0])
+      onSeleccionar(elemento)
     }
   }, [onSeleccionar])
 
@@ -263,14 +263,25 @@ function MapInvalidator({ sidebarAbierto }) {
 }
 
 // OVERLAY CON FICHA RÁPIDA DEL NIDO
-function FichaNido({ nido, onCerrar, onVerFicha }) {
-  if (!nido) return null
+// NAVEGACIÓN MÓVIL DE GRUPO
+function FichaNido({ elemento, onCerrar, onVerFicha }) {
+  const [indice, setIndice] = useState(0)
+  if (!elemento) return null
+  const nidos = elemento.nidos
+  const nido = nidos[indice] || nidos[0]
   const foto = nido.foto_principal
 
   return (
     <div className="ficha-overlay" onClick={onCerrar}>
       <div className="ficha-contenido" onClick={(e) => e.stopPropagation()}>
         <button className="ficha-cerrar" onClick={onCerrar} aria-label="Cerrar">✕</button>
+        {nidos.length > 1 && (
+          <div className="ficha-navegacion">
+            <button className="ficha-flecha" onClick={() => setIndice((indice - 1 + nidos.length) % nidos.length)}>←</button>
+            <span className="ficha-posicion">Nido {indice + 1} de {nidos.length}</span>
+            <button className="ficha-flecha" onClick={() => setIndice((indice + 1) % nidos.length)}>→</button>
+          </div>
+        )}
         {foto && (
           <img src={foto} alt={nido.nombre} className="ficha-foto" />
         )}
@@ -518,7 +529,7 @@ function NestsMap({ sidebarAbierto }) {
       )}
 
       <FichaNido
-        nido={nidoSeleccionado}
+        elemento={nidoSeleccionado}
         onCerrar={() => setNidoSeleccionado(null)}
         onVerFicha={(id) => {
           setNidoSeleccionado(null)

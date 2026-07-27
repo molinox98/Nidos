@@ -532,6 +532,39 @@
   background: rgba(0, 0, 0, 0.15);
 }
 
+/* NAVEGACIÓN DE GRUPO EN FICHA RÁPIDA MÓVIL */
+
+.ficha-navegacion {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
+}
+
+.ficha-flecha {
+  background: #f0f2ef;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.25rem 0.55rem;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1.4;
+  transition: background 0.15s;
+  color: #333;
+}
+
+.ficha-flecha:hover {
+  background: #e0e4e0;
+}
+
+.ficha-posicion {
+  font-size: 0.82rem;
+  color: #555;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 .ficha-foto {
   display: block;
   width: 100%;
