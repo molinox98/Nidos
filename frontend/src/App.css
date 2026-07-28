@@ -960,6 +960,94 @@
   font-family: inherit;
 }
 
+/* Imagen clicable en galería */
+
+.panel-galeria-foto--clicable {
+  cursor: pointer;
+}
+
+.panel-galeria-sin-foto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f2ef;
+  color: #aaa;
+  font-size: 0.8rem;
+}
+
+/* VISOR DE IMAGEN EN MODAL */
+
+.visor-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.visor-contenido {
+  position: relative;
+  max-width: 90vw;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.visor-foto {
+  max-width: 90vw;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.visor-cerrar {
+  position: absolute;
+  top: -0.5rem;
+  right: -0.5rem;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  font-size: 1.1rem;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  z-index: 1;
+}
+
+.visor-cerrar:hover {
+  background: #fff;
+}
+
+.visor-badge {
+  margin-bottom: 0.5rem;
+  padding: 0.2rem 0.7rem;
+  background: #1f5c3b;
+  color: #fff;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.visor-descripcion {
+  margin: 0.5rem 0 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.88rem;
+  text-align: center;
+  max-width: 90vw;
+}
+
 .panel-vacio {
   color: #999;
   font-size: 0.85rem;
