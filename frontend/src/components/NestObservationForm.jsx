@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { getEspecies } from '../api/especies'
 import { createObservacion } from '../api/observaciones'
+import { uploadImagen } from '../api/imagenes'
 
 // FECHA DE HOY EN FORMATO ISO
 function hoyISO() {
@@ -20,6 +21,12 @@ export default function NestObservationForm({ nidoId, onCrear, onCerrar }) {
   const [error, setError] = useState(null)
   const [guardando, setGuardando] = useState(false)
 
+  // IMÁGENES DE OBSERVACIÓN
+  const [archivos, setArchivos] = useState([])
+  const [descripcionImg, setDescripcionImg] = useState('')
+  const [esPrincipalImg, setEsPrincipalImg] = useState(false)
+  const [errorImg, setErrorImg] = useState(null)
+
   useEffect(() => {
     getEspecies()
       .then(setEspecies)
@@ -30,6 +37,7 @@ export default function NestObservationForm({ nidoId, onCrear, onCerrar }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError(null)
+    setErrorImg(null)
 
     if (!fechaObservacion) { setError('La fecha de observación es obligatoria.'); return }
 
@@ -48,6 +56,32 @@ export default function NestObservationForm({ nidoId, onCrear, onCerrar }) {
       if (notas.trim()) body.notas = notas.trim()
 
       const nueva = await createObservacion(body)
+
+      // SUBIDA TRAS CREAR OBSERVACIÓN
+      let falloImagenes = false
+      if (archivos.length > 0) {
+        for (let i = 0; i < archivos.length; i++) {
+          try {
+            const fd = new FormData()
+            fd.append('nido', nidoId)
+            fd.append('observacion', nueva.id)
+            fd.append('archivo', archivos[i])
+            if (descripcionImg.trim()) fd.append('descripcion', descripcionImg.trim())
+            // PRIMERA IMAGEN COMO PRINCIPAL
+            fd.append('es_principal', (esPrincipalImg && i === 0) ? 'true' : 'false')
+            await uploadImagen(fd)
+          } catch {
+            falloImagenes = true
+          }
+        }
+      }
+
+      if (falloImagenes) {
+        setErrorImg(
+          'La observación se creó, pero una o varias imágenes no se pudieron subir.'
+        )
+      }
+
       onCrear(nueva)
     } catch (err) {
       if (err.data) {
@@ -125,7 +159,44 @@ export default function NestObservationForm({ nidoId, onCrear, onCerrar }) {
               <textarea rows={3} value={notas} onChange={(e) => setNotas(e.target.value)} />
             </div>
 
+            {/* IMÁGENES DE OBSERVACIÓN */}
+            <div className="form-seccion-imagen">
+              <p className="form-seccion-imagen-titulo">Imágenes de la observación</p>
+              <div className="form-campo">
+                <label>Archivos de imagen</label>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={(e) => setArchivos(Array.from(e.target.files))}
+                />
+                <p className="form-grupo-ayuda">Puedes seleccionar una o varias imágenes.</p>
+                {archivos.length > 0 && (
+                  <p className="form-grupo-ayuda">{archivos.length} archivo(s) seleccionado(s).</p>
+                )}
+              </div>
+              <div className="form-campo">
+                <label>Descripción (compartida)</label>
+                <textarea
+                  rows={2}
+                  value={descripcionImg}
+                  onChange={(e) => setDescripcionImg(e.target.value)}
+                />
+              </div>
+              <div className="form-campo">
+                <label className="form-checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={esPrincipalImg}
+                    onChange={(e) => setEsPrincipalImg(e.target.checked)}
+                  />
+                  Marcar primera imagen como principal
+                </label>
+              </div>
+            </div>
+
             {error && <p className="form-error">{error}</p>}
+            {errorImg && <p className="form-error form-error--aviso">{errorImg}</p>}
 
             <div className="form-acciones">
               <button type="button" className="form-boton-cancelar" onClick={onCerrar}>Cancelar</button>

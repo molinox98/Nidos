@@ -1298,6 +1298,27 @@
   cursor: not-allowed;
 }
 
+/* Sección de imágenes en formulario de observación */
+
+.form-seccion-imagen {
+  margin-top: 0.5rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid #eee;
+}
+
+.form-seccion-imagen-titulo {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  color: #24302a;
+  font-weight: 600;
+}
+
+.form-error--aviso {
+  background: #fef3e2;
+  border-color: #e67e22;
+  color: #b8600e;
+}
+
 /* Botón nuevo dentro del panel */
 
 .panel-boton-nuevo {
