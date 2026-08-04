@@ -2,12 +2,13 @@ import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import logo from '../assets/logo-nidos.png'
 import NestsMap from './NestsMap'
+import SpeciesManager from './SpeciesManager'
 
 const SECCIONES = [
+  { id: 'especies', label: 'Gestión de especies' },
   { id: 'nidos', label: 'Gestión de nidos' },
   { id: 'observaciones', label: 'Observaciones' },
   { id: 'imagenes', label: 'Imágenes' },
-  { id: 'especies', label: 'Especies' },
   { id: 'usuarios', label: 'Usuarios' },
 ]
 
@@ -17,7 +18,7 @@ const ROLES = {
   consulta: 'Consulta',
 }
 
-// LAYOUT PRINCIPAL CON CABECERA, SIDEBAR Y MAPA
+// LAYOUT PRINCIPAL CON CABECERA, SIDEBAR Y VISTA ACTIVA
 function AppLayout() {
   const { usuario, logout } = useAuth()
   const [seccionActiva, setSeccionActiva] = useState(null)
@@ -55,11 +56,25 @@ function AppLayout() {
       <div className="layout-cuerpo">
         <nav className={`layout-sidebar ${sidebarAbierto ? '' : 'layout-sidebar--oculto'}`}>
           <ul className="layout-nav">
+            <li>
+              <button
+                className={`layout-nav-item ${seccionActiva === null ? 'layout-nav-item--activa' : ''}`}
+                onClick={() => {
+                  setSeccionActiva(null)
+                  setSidebarAbierto(false)
+                }}
+              >
+                <span className="layout-nav-label">Mapa</span>
+              </button>
+            </li>
             {SECCIONES.map((s) => (
               <li key={s.id}>
                 <button
                   className={`layout-nav-item ${seccionActiva === s.id ? 'layout-nav-item--activa' : ''}`}
-                  onClick={() => setSeccionActiva(seccionActiva === s.id ? null : s.id)}
+                  onClick={() => {
+                    setSeccionActiva(s.id)
+                    setSidebarAbierto(false)
+                  }}
                 >
                   <span className="layout-nav-label">{s.label}</span>
                 </button>
@@ -74,8 +89,10 @@ function AppLayout() {
         />
 
         <main className="layout-contenido">
+          {/* CAMBIO DE VISTA PRINCIPAL */}
           {seccionActiva === null && <NestsMap sidebarAbierto={sidebarAbierto} />}
-          {seccionActiva !== null && (
+          {seccionActiva === 'especies' && <SpeciesManager />}
+          {seccionActiva !== null && seccionActiva !== 'especies' && (
             <div className="layout-placeholder">
               <h2>{SECCIONES.find((s) => s.id === seccionActiva)?.label}</h2>
               <p>Sección en desarrollo. Se implementará en una fase posterior.</p>
