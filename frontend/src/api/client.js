@@ -42,6 +42,11 @@ export async function apiRequest(path, options = {}) {
     throw new Error('SESSION_EXPIRED')
   }
 
+  // RESPUESTAS SIN CONTENIDO
+  if (response.status === 204) {
+    return null
+  }
+
   const data = await response.json()
 
   if (!response.ok) {
@@ -69,5 +74,11 @@ export async function apiPatch(path, body) {
   return apiRequest(path, {
     method: 'PATCH',
     body: JSON.stringify(body),
+  })
+}
+
+export async function apiDelete(path) {
+  return apiRequest(path, {
+    method: 'DELETE',
   })
 }

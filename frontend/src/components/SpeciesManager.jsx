@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { getEspecies, createEspecie, updateEspecie } from '../api/especies'
+import { getEspecies, createEspecie, updateEspecie, deleteEspecie } from '../api/especies'
 import { formatoFecha } from '../utils/date'
 import SpeciesForm from './SpeciesForm'
 
@@ -9,10 +9,13 @@ export default function SpeciesManager() {
   const { usuario } = useAuth()
   // PERMISOS DE EDICIÓN
   const puedeEditar = usuario?.rol === 'admin' || usuario?.rol === 'bander'
+  // SOLO ADMIN PUEDE BORRAR
+  const esAdmin = usuario?.rol === 'admin'
 
   const [especies, setEspecies] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
+  const [errorEliminar, setErrorEliminar] = useState(null)
   const [formAbierto, setFormAbierto] = useState(false)
   const [especieEditando, setEspecieEditando] = useState(null)
 
@@ -50,6 +53,20 @@ export default function SpeciesManager() {
     cargarEspecies()
   }
 
+  // ELIMINACIÓN CONTROLADA
+  const eliminarEspecie = async (especie) => {
+    setErrorEliminar(null)
+    if (!window.confirm('¿Seguro que quieres eliminar esta especie? Solo se eliminará si no está asociada a observaciones.')) {
+      return
+    }
+    try {
+      await deleteEspecie(especie.id)
+      cargarEspecies()
+    } catch (err) {
+      setErrorEliminar(err.data?.detail || 'No se pudo eliminar la especie.')
+    }
+  }
+
   return (
     <div className="species-gestion">
       <div className="species-cabecera">
@@ -64,6 +81,7 @@ export default function SpeciesManager() {
         )}
       </div>
 
+      {errorEliminar && <p className="species-borrar-error">{errorEliminar}</p>}
       {cargando && <p className="species-estado">Cargando especies...</p>}
       {error && <p className="species-estado species-estado--error">{error}</p>}
 
@@ -93,11 +111,18 @@ export default function SpeciesManager() {
                     <td className="species-celda-notas">{sp.notas || '—'}</td>
                     <td>{formatoFecha(sp.fecha_creacion)}</td>
                     <td className="species-col-acciones">
-                      {puedeEditar && (
-                        <button className="species-boton-editar" onClick={() => abrirFormulario(sp)}>
-                          Editar
-                        </button>
-                      )}
+                      <div className="species-fila-acciones">
+                        {puedeEditar && (
+                          <button className="species-boton-editar" onClick={() => abrirFormulario(sp)}>
+                            Editar
+                          </button>
+                        )}
+                        {esAdmin && (
+                          <button className="species-boton-eliminar" onClick={() => eliminarEspecie(sp)}>
+                            Eliminar
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -111,11 +136,18 @@ export default function SpeciesManager() {
               <div className="species-fila" key={sp.id}>
                 <div className="species-fila-cabecera">
                   <span className="species-fila-nombre">{sp.nombre_comun}</span>
-                  {puedeEditar && (
-                    <button className="species-boton-editar" onClick={() => abrirFormulario(sp)}>
-                      Editar
-                    </button>
-                  )}
+                  <div className="species-fila-acciones">
+                    {puedeEditar && (
+                      <button className="species-boton-editar" onClick={() => abrirFormulario(sp)}>
+                        Editar
+                      </button>
+                    )}
+                    {esAdmin && (
+                      <button className="species-boton-eliminar" onClick={() => eliminarEspecie(sp)}>
+                        Eliminar
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <div className="species-fila-detalle">{sp.nombre_cientifico || 'Sin nombre científico'}</div>
                 {sp.notas && <div className="species-fila-detalle">{sp.notas}</div>}

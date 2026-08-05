@@ -1494,8 +1494,15 @@
 }
 
 .species-col-acciones {
-  width: 90px;
+  width: 150px;
   text-align: center;
+}
+
+.species-fila-acciones {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  justify-content: center;
 }
 
 .species-boton-editar {
@@ -1512,6 +1519,32 @@
 
 .species-boton-editar:hover {
   background: #dceadd;
+}
+
+.species-boton-eliminar {
+  padding: 0.35rem 0.75rem;
+  background: #fdf0ef;
+  border: 1px solid #e8c1bd;
+  border-radius: 5px;
+  color: #c0392b;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.species-boton-eliminar:hover {
+  background: #f5dcd9;
+}
+
+.species-borrar-error {
+  margin: 0 0 1rem;
+  padding: 0.6rem 0.9rem;
+  background: #fdecea;
+  border: 1px solid #e74c3c;
+  border-radius: 6px;
+  color: #c0392b;
+  font-size: 0.85rem;
 }
 
 /* Lista compacta en móvil */

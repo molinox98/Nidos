@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPatch } from './client'
+import { apiGet, apiPost, apiPatch, apiDelete } from './client'
 
 // LISTAR ESPECIES
 export function getEspecies() {
@@ -13,4 +13,9 @@ export function createEspecie(data) {
 // ACTUALIZAR ESPECIE
 export function updateEspecie(id, data) {
   return apiPatch(`/api/especies/${id}/`, data)
+}
+
+// ELIMINAR ESPECIE
+export function deleteEspecie(id) {
+  return apiDelete(`/api/especies/${id}/`)
 }
