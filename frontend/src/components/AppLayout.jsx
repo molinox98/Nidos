@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext'
 import logo from '../assets/logo-nidos.png'
 import NestsMap from './NestsMap'
 import SpeciesManager from './SpeciesManager'
+import UsersManager from './UsersManager'
 
 const SECCIONES = [
   { id: 'especies', label: 'Gestión de especies' },
@@ -23,6 +24,10 @@ function AppLayout() {
   const { usuario, logout } = useAuth()
   const [seccionActiva, setSeccionActiva] = useState(null)
   const [sidebarAbierto, setSidebarAbierto] = useState(false)
+
+  // SOLO ADMIN VE LA GESTIÓN DE USUARIOS
+  const esAdmin = usuario?.rol === 'admin'
+  const seccionesVisibles = SECCIONES.filter((s) => s.id !== 'usuarios' || esAdmin)
 
   return (
     <div className="layout">
@@ -67,7 +72,7 @@ function AppLayout() {
                 <span className="layout-nav-label">Mapa</span>
               </button>
             </li>
-            {SECCIONES.map((s) => (
+            {seccionesVisibles.map((s) => (
               <li key={s.id}>
                 <button
                   className={`layout-nav-item ${seccionActiva === s.id ? 'layout-nav-item--activa' : ''}`}
@@ -92,7 +97,8 @@ function AppLayout() {
           {/* CAMBIO DE VISTA PRINCIPAL */}
           {seccionActiva === null && <NestsMap sidebarAbierto={sidebarAbierto} />}
           {seccionActiva === 'especies' && <SpeciesManager />}
-          {seccionActiva !== null && seccionActiva !== 'especies' && (
+          {seccionActiva === 'usuarios' && <UsersManager />}
+          {seccionActiva !== null && seccionActiva !== 'especies' && seccionActiva !== 'usuarios' && (
             <div className="layout-placeholder">
               <h2>{SECCIONES.find((s) => s.id === seccionActiva)?.label}</h2>
               <p>Sección en desarrollo. Se implementará en una fase posterior.</p>

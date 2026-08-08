@@ -6,7 +6,11 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.common.permissions import SoloAdmin
 from apps.users.models import Usuario
-from apps.users.serializers import CustomTokenObtainSerializer, UsuarioSerializer
+from apps.users.serializers import (
+    CustomTokenObtainSerializer,
+    UsuarioSerializer,
+    UsuarioWriteSerializer,
+)
 
 
 # LOGIN PERSONALIZADO (EMAIL O NOMBRE + PASSWORD)
@@ -35,8 +39,13 @@ class UsuarioActualView(APIView):
         return Response(serializer.data)
 
 
-# LISTADO DE USUARIOS (SOLO ADMIN)
-class UsuarioViewSet(viewsets.ReadOnlyModelViewSet):
+# GESTIÓN DE USUARIOS (SOLO ADMIN, SIN BORRADO)
+class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all().order_by('nombre')
-    serializer_class = UsuarioSerializer
     permission_classes = [SoloAdmin]
+    http_method_names = ['get', 'post', 'patch', 'put', 'head', 'options']
+
+    def get_serializer_class(self):
+        if self.request.method in ('POST', 'PATCH', 'PUT'):
+            return UsuarioWriteSerializer
+        return UsuarioSerializer

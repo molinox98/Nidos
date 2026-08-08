@@ -6,12 +6,50 @@ from apps.users.models import Usuario
 User = get_user_model()
 
 
-# SERIALIZADOR BÁSICO DE USUARIO
+# SERIALIZADOR BÁSICO DE USUARIO (LECTURA)
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
-        fields = ['id', 'nombre', 'email', 'rol', 'activo', 'is_staff', 'is_superuser']
+        fields = [
+            'id', 'nombre', 'email', 'rol', 'activo',
+            'is_staff', 'is_superuser', 'fecha_creacion', 'fecha_actualizacion',
+        ]
         read_only_fields = fields
+
+
+# SERIALIZADOR DE ESCRITURA PARA CREAR O EDITAR USUARIOS
+class UsuarioWriteSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=False, allow_blank=True)
+
+    class Meta:
+        model = Usuario
+        fields = ['id', 'nombre', 'email', 'rol', 'activo', 'password', 'is_staff', 'is_superuser']
+        read_only_fields = ['id', 'is_staff', 'is_superuser']
+
+    def validate(self, attrs):
+        # PASSWORD OBLIGATORIA AL CREAR
+        if self.instance is None and not attrs.get('password'):
+            raise serializers.ValidationError({'password': 'La contraseña es obligatoria al crear el usuario.'})
+        return attrs
+
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        return Usuario.objects.create_user(
+            email=validated_data.pop('email'),
+            nombre=validated_data.pop('nombre'),
+            password=password,
+            **validated_data,
+        )
+
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)
+        # CONTRASEÑA VACÍA MANTIENE LA ACTUAL
+        if password:
+            instance.set_password(password)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
 
 
 # LOGIN POR EMAIL O NOMBRE CON VALIDACIÓN
