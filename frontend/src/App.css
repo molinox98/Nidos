@@ -1126,6 +1126,118 @@
   background: rgba(255, 255, 255, 0.35);
 }
 
+/* FILTROS VISUALES DEL MAPA */
+
+.mapa-filtros {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 1000;
+}
+
+.mapa-filtros-boton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fff;
+  color: #24302a;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: background 0.15s;
+}
+
+.mapa-filtros-boton:hover {
+  background: #f4f7f2;
+}
+
+.mapa-filtros-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: #1f5c3b;
+  color: #fff;
+  border-radius: 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.mapa-filtros-panel {
+  margin-top: 0.4rem;
+  width: 250px;
+  max-width: calc(100vw - 1.5rem);
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
+  padding: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mapa-filtros-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.mapa-filtros-campo label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.mapa-filtros-campo select {
+  width: 100%;
+  padding: 0.45rem 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  background: #fff;
+  color: #333;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.mapa-filtros-campo select:focus {
+  border-color: #2f7d4f;
+}
+
+.mapa-filtros-acciones {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid #eee;
+  padding-top: 0.6rem;
+}
+
+.mapa-filtros-limpiar {
+  padding: 0.4rem 0.8rem;
+  background: #f0f0f0;
+  color: #555;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.mapa-filtros-limpiar:hover {
+  background: #e0e0e0;
+}
+
 /* Marcador temporal de ubicación */
 
 .ubicacion-temporal {
@@ -1842,6 +1954,15 @@
     max-width: 90vw;
     flex-direction: column;
     gap: 0.4rem;
+  }
+
+  .mapa-filtros {
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+
+  .mapa-filtros-panel {
+    width: calc(100vw - 1rem);
   }
 
   .species-gestion {

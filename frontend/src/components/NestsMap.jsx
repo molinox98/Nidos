@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext'
 import NestDetailPanel from './NestDetailPanel'
 import NestCreateForm from './NestCreateForm'
 import NestGroupCreateForm from './NestGroupCreateForm'
+import MapFilters, { VALOR_SIN_ESPECIE } from './MapFilters'
 
 // CENTRO Y LÍMITES DEL MAPA DE ANDORRA
 const CENTRO_ANDORRA = [42.5063, 1.5218]
@@ -64,6 +65,23 @@ function peorEstado(nidos) {
     if (ORDEN_ESTADO[e] < ORDEN_ESTADO[peor]) peor = e
   }
   return peor
+}
+
+// APLICA LOS FILTROS SELECCIONADOS A LOS NIDOS
+function aplicarFiltros(nidos, filtros) {
+  return nidos.filter((n) => {
+    if (filtros.estado && n.estado !== filtros.estado) return false
+    if (filtros.grupo && n.grupo_nombre !== filtros.grupo) return false
+    if (filtros.especie === VALOR_SIN_ESPECIE && n.especie_ultima_observacion) return false
+    if (filtros.especie && filtros.especie !== VALOR_SIN_ESPECIE && n.especie_ultima_observacion !== filtros.especie) return false
+    if (filtros.ocupacion === 'ocupado' && n.ocupado !== true) return false
+    if (filtros.ocupacion === 'desocupado' && n.ocupado !== false) return false
+    if (filtros.huevos === 'con' && n.hay_huevos !== true) return false
+    if (filtros.huevos === 'sin' && n.hay_huevos !== false) return false
+    if (filtros.polluelos === 'con' && n.hay_polluelos !== true) return false
+    if (filtros.polluelos === 'sin' && n.hay_polluelos !== false) return false
+    return true
+  })
 }
 
 // AGRUPACIÓN DE NIDOS POR GRUPO PARA EL MAPA
@@ -355,6 +373,7 @@ function NestsMap({ sidebarAbierto }) {
   const [seleccionandoUbicacionGrupo, setSeleccionandoUbicacionGrupo] = useState(false)
   const [ubicacionTemporal, setUbicacionTemporal] = useState(null)
   const [ubicacionTemporalGrupo, setUbicacionTemporalGrupo] = useState(null)
+  const [filtros, setFiltros] = useState({ estado: '', grupo: '', especie: '', ocupacion: '', huevos: '', polluelos: '' })
 
   // DETECCIÓN REACTIVA DE DISPOSITIVO MÓVIL
   const [esMovil, setEsMovil] = useState(() =>
@@ -366,7 +385,19 @@ function NestsMap({ sidebarAbierto }) {
     return () => window.removeEventListener('resize', handler)
   }, [])
 
-  const elementos = agruparNidos(nidos)
+  const nidosFiltrados = aplicarFiltros(nidos, filtros)
+  const elementos = agruparNidos(nidosFiltrados)
+
+  // OPCIONES DE GRUPO Y ESPECIE PRESENTES EN EL MAPA
+  const opcionesGrupos = [...new Set(
+    nidos.map((n) => n.grupo_nombre).filter(Boolean)
+  )].sort((a, b) => a.localeCompare(b, 'es'))
+
+  const opcionesEspecies = [...new Set(
+    nidos.map((n) => n.especie_ultima_observacion).filter(Boolean)
+  )].sort((a, b) => a.localeCompare(b, 'es'))
+
+  const filtrosActivos = !!(filtros.estado || filtros.grupo || filtros.especie || filtros.ocupacion || filtros.huevos || filtros.polluelos)
 
   const puedeCrear = usuario && (usuario.rol === 'admin' || usuario.rol === 'bander')
 
@@ -409,6 +440,24 @@ function NestsMap({ sidebarAbierto }) {
   const handleUbicacionGrupoSeleccionada = (punto) => {
     setUbicacionTemporalGrupo(punto)
     setSeleccionandoUbicacionGrupo(false)
+  }
+
+  // ACTUALIZA LOS FILTROS Y CIERRA FICHA O DETALLE SI EL NIDO QUEDA FUERA
+  const handleCambiarFiltros = (nuevosFiltros) => {
+    setFiltros(nuevosFiltros)
+    const visibles = aplicarFiltros(nidos, nuevosFiltros)
+    const ids = new Set(visibles.map((n) => n.id))
+    if (nidoSeleccionado && !nidoSeleccionado.nidos.some((n) => ids.has(n.id))) {
+      setNidoSeleccionado(null)
+    }
+    if (nidoDetalleId && !ids.has(nidoDetalleId)) {
+      setNidoDetalleId(null)
+    }
+  }
+
+  // RESTABLECE TODOS LOS FILTROS DEL MAPA
+  const handleLimpiarFiltros = () => {
+    setFiltros({ estado: '', grupo: '', especie: '', ocupacion: '', huevos: '', polluelos: '' })
   }
   if (cargando) {
     return (
@@ -476,9 +525,26 @@ function NestsMap({ sidebarAbierto }) {
         )}
       </MapContainer>
 
+      {nidos.length > 0 && !seleccionandoUbicacion && !seleccionandoUbicacionGrupo && (
+        <MapFilters
+          filtros={filtros}
+          grupos={opcionesGrupos}
+          especies={opcionesEspecies}
+          onCambiar={handleCambiarFiltros}
+          onLimpiar={handleLimpiarFiltros}
+          filtrosActivos={filtrosActivos}
+        />
+      )}
+
       {nidos.length === 0 && (
         <div className="mapa-sin-nidos">
           <p>No hay nidos registrados.</p>
+        </div>
+      )}
+
+      {nidos.length > 0 && nidosFiltrados.length === 0 && (
+        <div className="mapa-sin-nidos">
+          <p>No hay nidos que coincidan con los filtros.</p>
         </div>
       )}
 
