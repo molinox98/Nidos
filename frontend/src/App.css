@@ -615,6 +615,27 @@
   background: #244a36;
 }
 
+/* Botón añadir nido en ficha rápida móvil */
+
+.ficha-anadir-nido {
+  display: block;
+  width: 100%;
+  margin-top: 0.6rem;
+  padding: 0.6rem;
+  background: #eef4ef;
+  color: #1f5c3b;
+  border: 1px solid #cfe0d4;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.ficha-anadir-nido:hover {
+  background: #dceadd;
+}
+
 /* Botón ver ficha en popup escritorio */
 
 .nest-popup-ver-ficha {
@@ -634,6 +655,27 @@
 
 .nest-popup-ver-ficha:hover {
   background: #244a36;
+}
+
+/* Botón añadir nido en popup de grupo */
+
+.nest-popup-anadir-nido {
+  display: block;
+  width: 100%;
+  margin-top: 0.45rem;
+  padding: 0.45rem;
+  background: #eef4ef;
+  color: #1f5c3b;
+  border: 1px solid #cfe0d4;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.nest-popup-anadir-nido:hover {
+  background: #dceadd;
 }
 
 /* Panel lateral de detalle */

@@ -131,7 +131,7 @@ function crearIconoGrupo(color, size, count) {
 }
 
 // POPUP CON NAVEGACIÓN ENTRE NIDOS DE UN GRUPO
-function NestPopupContent({ elemento, onVerFicha }) {
+function NestPopupContent({ elemento, onVerFicha, onAnadirNido, puedeAnadirNido }) {
   const [indice, setIndice] = useState(0)
   const nidos = elemento.nidos
   const current = nidos[indice]
@@ -213,12 +213,17 @@ function NestPopupContent({ elemento, onVerFicha }) {
       <button className="nest-popup-ver-ficha" onClick={() => onVerFicha(current.id)}>
         Ver ficha
       </button>
+      {elemento.tipo === 'grupo' && puedeAnadirNido && (
+        <button className="nest-popup-anadir-nido" onClick={() => onAnadirNido(elemento)}>
+          + Añadir nido
+        </button>
+      )}
     </div>
   )
 }
 
 // MARCADORES DEL MAPA: GRUPO CON NÚMERO O NIDO SUELTO CON PUNTO
-function Marcadores({ elementos, zoom, onSeleccionar, onVerFicha, seleccionandoUbicacion, seleccionandoUbicacionGrupo }) {
+function Marcadores({ elementos, zoom, onSeleccionar, onVerFicha, onAnadirNido, puedeAnadirNido, seleccionandoUbicacion, seleccionandoUbicacionGrupo }) {
   const handleClick = useCallback((elemento) => {
     if (esMovil() && elemento.nidos.length > 0) {
       onSeleccionar(elemento)
@@ -243,7 +248,12 @@ function Marcadores({ elementos, zoom, onSeleccionar, onVerFicha, seleccionandoU
       >
         {!esMovil() && (
           <Popup maxWidth={300}>
-            <NestPopupContent elemento={elemento} onVerFicha={onVerFicha} />
+            <NestPopupContent
+              elemento={elemento}
+              onVerFicha={onVerFicha}
+              onAnadirNido={onAnadirNido}
+              puedeAnadirNido={puedeAnadirNido}
+            />
           </Popup>
         )}
       </Marker>
@@ -280,9 +290,8 @@ function MapInvalidator({ sidebarAbierto }) {
   return null
 }
 
-// OVERLAY CON FICHA RÁPIDA DEL NIDO
-// NAVEGACIÓN MÓVIL DE GRUPO
-function FichaNido({ elemento, onCerrar, onVerFicha }) {
+// FICHA RÁPIDA MÓVIL CON NAVEGACIÓN ENTRE NIDOS DEL GRUPO
+function FichaNido({ elemento, onCerrar, onVerFicha, onAnadirNido, puedeAnadirNido }) {
   const [indice, setIndice] = useState(0)
   if (!elemento) return null
   const nidos = elemento.nidos
@@ -353,6 +362,11 @@ function FichaNido({ elemento, onCerrar, onVerFicha }) {
         <button className="ficha-ver-detalle" onClick={() => onVerFicha(nido.id)}>
           Ver ficha completa
         </button>
+        {elemento.tipo === 'grupo' && puedeAnadirNido && (
+          <button className="ficha-anadir-nido" onClick={() => onAnadirNido(elemento)}>
+            + Añadir nido
+          </button>
+        )}
       </div>
     </div>
   )
@@ -373,6 +387,7 @@ function NestsMap({ sidebarAbierto }) {
   const [seleccionandoUbicacionGrupo, setSeleccionandoUbicacionGrupo] = useState(false)
   const [ubicacionTemporal, setUbicacionTemporal] = useState(null)
   const [ubicacionTemporalGrupo, setUbicacionTemporalGrupo] = useState(null)
+  const [grupoNidoForm, setGrupoNidoForm] = useState(null)
   const [filtros, setFiltros] = useState({ estado: '', grupo: '', especie: '', ocupacion: '', huevos: '', polluelos: '' })
 
   // DETECCIÓN REACTIVA DE DISPOSITIVO MÓVIL
@@ -421,7 +436,20 @@ function NestsMap({ sidebarAbierto }) {
     setMostrandoFormulario(false)
     setSeleccionandoUbicacion(false)
     setUbicacionTemporal(null)
+    setGrupoNidoForm(null)
     recargarNidos()
+  }
+
+  // ABRE EL FORMULARIO DE NUEVO NIDO EN UN GRUPO EXISTENTE CON GRUPO Y COORDENADAS
+  const abrirFormularioNuevoNidoEnGrupo = (elemento) => {
+    setGrupoNidoForm({
+      id: elemento.nidos[0].grupo_nido,
+      nombre: elemento.nombre,
+      lat: elemento.lat,
+      lng: elemento.lng,
+      nidos: elemento.nidos,
+    })
+    setMostrandoFormulario(true)
   }
 
   // CIERRE DEL FORMULARIO Y RECARGA TRAS CREAR GRUPO
@@ -507,6 +535,8 @@ function NestsMap({ sidebarAbierto }) {
             zoom={zoom}
             onSeleccionar={setNidoSeleccionado}
             onVerFicha={setNidoDetalleId}
+            onAnadirNido={abrirFormularioNuevoNidoEnGrupo}
+            puedeAnadirNido={puedeCrear}
             seleccionandoUbicacion={seleccionandoUbicacion}
             seleccionandoUbicacionGrupo={seleccionandoUbicacionGrupo}
           />
@@ -601,6 +631,11 @@ function NestsMap({ sidebarAbierto }) {
           setNidoSeleccionado(null)
           setNidoDetalleId(id)
         }}
+        onAnadirNido={(elemento) => {
+          setNidoSeleccionado(null)
+          abrirFormularioNuevoNidoEnGrupo(elemento)
+        }}
+        puedeAnadirNido={puedeCrear}
       />
       {nidoDetalleId && (
         <NestDetailPanel
@@ -611,11 +646,13 @@ function NestsMap({ sidebarAbierto }) {
       )}
       {mostrandoFormulario && (
         <NestCreateForm
+          grupo={grupoNidoForm}
           onCrear={handleCrearNido}
           onCerrar={() => {
             setMostrandoFormulario(false)
             setSeleccionandoUbicacion(false)
             setUbicacionTemporal(null)
+            setGrupoNidoForm(null)
           }}
           onIniciarSeleccion={() => setSeleccionandoUbicacion(true)}
           onCancelarSeleccion={() => {

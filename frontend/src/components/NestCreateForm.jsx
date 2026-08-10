@@ -22,25 +22,40 @@ function hoyISO() {
   return new Date().toISOString().split('T')[0]
 }
 
-export default function NestCreateForm({ onCrear, onCerrar, onIniciarSeleccion, onCancelarSeleccion, seleccionandoUbicacion, ubicacionTemporal, ocultoMovil }) {
-  const [nombre, setNombre] = useState('')
-  const [latitud, setLatitud] = useState('')
-  const [longitud, setLongitud] = useState('')
+// SUGIERE EL SIGUIENTE CÓDIGO NUMÉRICO DENTRO DEL GRUPO
+function siguienteCodigoGrupo(nidos) {
+  let max = 0
+  for (const n of nidos) {
+    const num = parseInt(n.codigo_en_grupo, 10)
+    if (Number.isFinite(num) && num > max) max = num
+  }
+  return max > 0 ? String(max + 1) : ''
+}
+
+export default function NestCreateForm({ grupo, onCrear, onCerrar, onIniciarSeleccion, onCancelarSeleccion, seleccionandoUbicacion, ubicacionTemporal, ocultoMovil }) {
+  // CÓDIGO Y NOMBRE SUGERIDOS PARA NUEVO NIDO EN GRUPO
+  const codigoSugerido = grupo ? siguienteCodigoGrupo(grupo.nidos) : ''
+
+  const [nombre, setNombre] = useState(() => (codigoSugerido ? `${grupo.nombre} - Nido ${codigoSugerido}` : ''))
+  const [latitud, setLatitud] = useState(() => (grupo ? String(grupo.lat) : ''))
+  const [longitud, setLongitud] = useState(() => (grupo ? String(grupo.lng) : ''))
   const [descripcion, setDescripcion] = useState('')
   const [fechaDescubrimiento, setFechaDescubrimiento] = useState(hoyISO())
   const [estado, setEstado] = useState('activo')
   const [fechaEstado, setFechaEstado] = useState(hoyISO())
   const [motivoEstado, setMotivoEstado] = useState('')
   const [metodoUbicacion, setMetodoUbicacion] = useState('manual_mapa')
+  const [codigoEnGrupo, setCodigoEnGrupo] = useState(() => codigoSugerido)
+  const [posicionEnGrupo, setPosicionEnGrupo] = useState('')
   const [error, setError] = useState(null)
   const [guardando, setGuardando] = useState(false)
 
   useEffect(() => {
-    if (ubicacionTemporal) {
+    if (!grupo && ubicacionTemporal) {
       setLatitud(String(ubicacionTemporal.lat))
       setLongitud(String(ubicacionTemporal.lng))
     }
-  }, [ubicacionTemporal])
+  }, [ubicacionTemporal, grupo])
 
   // ENVÍA EL NIDO AL BACKEND
   const handleSubmit = async (e) => {
@@ -67,6 +82,11 @@ export default function NestCreateForm({ onCrear, onCerrar, onIniciarSeleccion, 
       if (descripcion.trim()) body.descripcion = descripcion.trim()
       if (fechaEstado) body.fecha_estado = fechaEstado
       if (motivoEstado.trim()) body.motivo_estado = motivoEstado.trim()
+      if (grupo) {
+        body.grupo_nido = grupo.id
+        if (codigoEnGrupo.trim()) body.codigo_en_grupo = codigoEnGrupo.trim()
+        if (posicionEnGrupo.trim()) body.posicion_en_grupo = posicionEnGrupo.trim()
+      }
 
       const nuevo = await createNido(body)
       onCrear(nuevo)
@@ -86,11 +106,18 @@ export default function NestCreateForm({ onCrear, onCerrar, onIniciarSeleccion, 
     <div className={`panel-overlay ${ocultoMovil ? 'panel-overlay--oculto-movil' : seleccionandoUbicacion ? 'panel-overlay--transparente' : ''}`} onClick={seleccionandoUbicacion ? undefined : onCerrar}>
       <div className="panel-lateral" onClick={(e) => e.stopPropagation()}>
         <div className="panel-cabecera">
-          <h3 className="panel-titulo">Nuevo nido</h3>
+          <h3 className="panel-titulo">{grupo ? 'Nuevo nido en grupo' : 'Nuevo nido'}</h3>
           <button className="panel-cerrar" onClick={onCerrar} aria-label="Cerrar">✕</button>
         </div>
         <div className="panel-cuerpo">
           <form className="form-nido" onSubmit={handleSubmit}>
+            {grupo && (
+              <div className="form-campo">
+                <label>Grupo</label>
+                <div className="form-texto-fijo">{grupo.nombre}</div>
+              </div>
+            )}
+
             <div className="form-campo">
               <label>Nombre *</label>
               <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} />
@@ -107,16 +134,38 @@ export default function NestCreateForm({ onCrear, onCerrar, onIniciarSeleccion, 
               </div>
             </div>
 
-            <button
-              type="button"
-              className="form-boton-mapa"
-              onClick={seleccionandoUbicacion ? onCancelarSeleccion : onIniciarSeleccion}
-            >
-              {seleccionandoUbicacion ? 'Cancelar selección' : 'Elegir ubicación en el mapa'}
-            </button>
+            {!grupo && (
+              <>
+                <button
+                  type="button"
+                  className="form-boton-mapa"
+                  onClick={seleccionandoUbicacion ? onCancelarSeleccion : onIniciarSeleccion}
+                >
+                  {seleccionandoUbicacion ? 'Cancelar selección' : 'Elegir ubicación en el mapa'}
+                </button>
 
-            {seleccionandoUbicacion && (
-              <p className="form-aviso-mapa">Haz clic en el mapa para seleccionar la ubicación del nido</p>
+                {seleccionandoUbicacion && (
+                  <p className="form-aviso-mapa">Haz clic en el mapa para seleccionar la ubicación del nido</p>
+                )}
+              </>
+            )}
+
+            {grupo && (
+              <div className="form-fila">
+                <div className="form-campo form-campo--mitad">
+                  <label>Código en grupo</label>
+                  <input type="text" value={codigoEnGrupo} onChange={(e) => setCodigoEnGrupo(e.target.value)} placeholder="Ej: 4" />
+                </div>
+                <div className="form-campo form-campo--mitad">
+                  <label>Posición física en el grupo</label>
+                  <input
+                    type="text"
+                    value={posicionEnGrupo}
+                    onChange={(e) => setPosicionEnGrupo(e.target.value)}
+                    placeholder="Ej. arriba derecha, centro, parte baja..."
+                  />
+                </div>
+              </div>
             )}
 
             <div className="form-campo">

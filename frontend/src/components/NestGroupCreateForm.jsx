@@ -21,7 +21,7 @@ function crearNidosArray(nombreGrupo, cantidad) {
   return Array.from({ length: cantidad }, (_, i) => ({
     nombre: `${nombreGrupo} - Nido ${i + 1}`,
     codigo_en_grupo: String(i + 1),
-    posicion_en_grupo: String(i + 1),
+    posicion_en_grupo: '',
     descripcion: '',
     estado: 'activo',
     fecha_descubrimiento: hoy,
@@ -245,8 +245,13 @@ export default function NestGroupCreateForm({
                         <div className="form-texto-fijo">{nido.codigo_en_grupo}</div>
                       </div>
                       <div className="form-campo form-campo--mitad">
-                        <label>Posición en grupo</label>
-                        <div className="form-texto-fijo">{nido.posicion_en_grupo}</div>
+                        <label>Posición física en el grupo</label>
+                        <input
+                          type="text"
+                          value={nido.posicion_en_grupo}
+                          onChange={(e) => handleNidoChange(idx, 'posicion_en_grupo', e.target.value)}
+                          placeholder="Ej. arriba derecha, centro, parte baja..."
+                        />
                       </div>
                     </div>
 
