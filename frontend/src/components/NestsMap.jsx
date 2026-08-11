@@ -84,6 +84,27 @@ function aplicarFiltros(nidos, filtros) {
   })
 }
 
+// ORDEN DE NIDOS EN GRUPO
+function esCodigoNumerico(codigo) {
+  return typeof codigo === 'string' && /^\d+$/.test(codigo.trim())
+}
+
+// COMPARA DOS NIDOS: CÓDIGO NUMÉRICO, ALFABÉTICO O ID COMO FALLBACK
+function ordenarNidosDeGrupo(a, b) {
+  const ca = a.codigo_en_grupo
+  const cb = b.codigo_en_grupo
+  const numA = esCodigoNumerico(ca)
+  const numB = esCodigoNumerico(cb)
+
+  if (numA && numB) return parseInt(ca, 10) - parseInt(cb, 10) || (a.id - b.id)
+  if (numA) return -1
+  if (numB) return 1
+  if (ca && cb) return ca.localeCompare(cb, 'es') || (a.id - b.id)
+  if (ca) return -1
+  if (cb) return 1
+  return a.id - b.id
+}
+
 // AGRUPACIÓN DE NIDOS POR GRUPO PARA EL MAPA
 function agruparNidos(nidos) {
   const grupos = {}
@@ -113,6 +134,10 @@ function agruparNidos(nidos) {
         nidos: [n],
       })
     }
+  }
+
+  for (const g of Object.values(grupos)) {
+    g.nidos.sort(ordenarNidosDeGrupo)
   }
 
   return [...Object.values(grupos), ...sueltos]
