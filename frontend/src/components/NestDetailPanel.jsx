@@ -11,6 +11,7 @@ import NestImagesGallery from './NestImagesGallery'
 import NestObservationForm from './NestObservationForm'
 import NestEventForm from './NestEventForm'
 import NestImageUploadForm from './NestImageUploadForm'
+import ObservationDetailModal from './ObservationDetailModal'
 
 const METODO_UBICACION_TEXTO = {
   manual_mapa: 'Mapa',
@@ -55,6 +56,7 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar }) {
   const [mostrandoFormObs, setMostrandoFormObs] = useState(false)
   const [mostrandoFormEvento, setMostrandoFormEvento] = useState(false)
   const [mostrandoFormImg, setMostrandoFormImg] = useState(false)
+  const [obsDetalle, setObsDetalle] = useState(null)
 
   const puedeCrear = usuario && (usuario.rol === 'admin' || usuario.rol === 'bander')
 
@@ -152,198 +154,208 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar }) {
   }
 
   return (
-    <div className="panel-overlay" onClick={onCerrar}>
-      <div className="panel-lateral" onClick={(e) => e.stopPropagation()}>
-        <div className="panel-cabecera">
-          <h3 className="panel-titulo">Ficha del nido</h3>
-          <button className="panel-cerrar" onClick={onCerrar} aria-label="Cerrar">✕</button>
-        </div>
+    <>
+      <div className="panel-overlay" onClick={onCerrar}>
+        <div className="panel-lateral" onClick={(e) => e.stopPropagation()}>
+          <div className="panel-cabecera">
+            <h3 className="panel-titulo">Ficha del nido</h3>
+            <button className="panel-cerrar" onClick={onCerrar} aria-label="Cerrar">✕</button>
+          </div>
 
-        <div className="panel-cuerpo">
-          {cargando && <PanelCargando />}
-          {error && <PanelError mensaje={error} />}
+          <div className="panel-cuerpo">
+            {cargando && <PanelCargando />}
+            {error && <PanelError mensaje={error} />}
 
-          {!cargando && !error && detalle && (
-            <>
-              {(() => {
-                const imgPrincipal = imagenes.find((i) => i.es_principal)
-                const fotoUrl = detalle.foto_principal
-                  || (imgPrincipal && imgPrincipal.archivo_url)
-                  || (imagenes.length > 0 && imagenes[0].archivo_url)
-                return fotoUrl ? (
-                  <img
-                    src={fotoUrl}
-                    alt={detalle.nombre}
-                    className="panel-foto"
-                  />
-                ) : (
-                  <div className="panel-sin-foto">Sin foto principal</div>
-                )
-              })()}
+            {!cargando && !error && detalle && (
+              <>
+                {(() => {
+                  const imgPrincipal = imagenes.find((i) => i.es_principal)
+                  const fotoUrl = detalle.foto_principal
+                    || (imgPrincipal && imgPrincipal.archivo_url)
+                    || (imagenes.length > 0 && imagenes[0].archivo_url)
+                  return fotoUrl ? (
+                    <img
+                      src={fotoUrl}
+                      alt={detalle.nombre}
+                      className="panel-foto"
+                    />
+                  ) : (
+                    <div className="panel-sin-foto">Sin foto principal</div>
+                  )
+                })()}
 
-              <div className="panel-cabecera-nido">
-                <h3 className="panel-nombre">{detalle.nombre}</h3>
-                <span
-                  className="panel-estado-badge"
-                  style={{ backgroundColor: colorEstado(detalle.estado) }}
-                >
-                  {textoEstado(detalle.estado)}
-                </span>
-              </div>
+                <div className="panel-cabecera-nido">
+                  <h3 className="panel-nombre">{detalle.nombre}</h3>
+                  <span
+                    className="panel-estado-badge"
+                    style={{ backgroundColor: colorEstado(detalle.estado) }}
+                  >
+                    {textoEstado(detalle.estado)}
+                  </span>
+                </div>
 
-              {detalle.grupo_nombre && (
-                <p className="panel-grupo">
-                  Grupo: {detalle.grupo_nombre}
-                  {detalle.codigo_en_grupo ? ` (${detalle.codigo_en_grupo})` : ''}
-                </p>
-              )}
+                {detalle.grupo_nombre && (
+                  <p className="panel-grupo">
+                    Grupo: {detalle.grupo_nombre}
+                    {detalle.codigo_en_grupo ? ` (${detalle.codigo_en_grupo})` : ''}
+                  </p>
+                )}
 
-              {detalle.posicion_en_grupo && (
-                <p className="panel-info-linea">Posición: {detalle.posicion_en_grupo}</p>
-              )}
+                {detalle.posicion_en_grupo && (
+                  <p className="panel-info-linea">Posición: {detalle.posicion_en_grupo}</p>
+                )}
 
-              <Seccion titulo="Datos generales">
-                <table className="panel-tabla">
-                  <tbody>
-                    <tr>
-                      <td className="panel-tabla-label">ID</td>
-                      <td>{detalle.id}</td>
-                    </tr>
-                    <tr>
-                      <td className="panel-tabla-label">Latitud</td>
-                      <td>{detalle.latitud}</td>
-                    </tr>
-                    <tr>
-                      <td className="panel-tabla-label">Longitud</td>
-                      <td>{detalle.longitud}</td>
-                    </tr>
-                    <tr>
-                      <td className="panel-tabla-label">Estado</td>
-                      <td style={{ color: colorEstado(detalle.estado), fontWeight: 600 }}>
-                        {textoEstado(detalle.estado)}
-                      </td>
-                    </tr>
-                    {detalle.fecha_descubrimiento && (
-                      <tr>
-                        <td className="panel-tabla-label">Descubrimiento</td>
-                        <td>{formatoFecha(detalle.fecha_descubrimiento)}</td>
-                      </tr>
-                    )}
-                    {detalle.fecha_estado && (
-                      <tr>
-                        <td className="panel-tabla-label">Fecha estado</td>
-                        <td>{formatoFecha(detalle.fecha_estado)}</td>
-                      </tr>
-                    )}
-                    {detalle.motivo_estado && (
-                      <tr>
-                        <td className="panel-tabla-label">Motivo estado</td>
-                        <td>{detalle.motivo_estado}</td>
-                      </tr>
-                    )}
-                    {detalle.metodo_ubicacion && (
-                      <tr>
-                        <td className="panel-tabla-label">Método ubicación</td>
-                        <td>{METODO_UBICACION_TEXTO[detalle.metodo_ubicacion] || detalle.metodo_ubicacion}</td>
-                      </tr>
-                    )}
-                    {detalle.descripcion && (
-                      <tr>
-                        <td className="panel-tabla-label">Descripción</td>
-                        <td>{detalle.descripcion}</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </Seccion>
-
-              {observaciones.length > 0 && (
-                <Seccion titulo="Última observación">
+                <Seccion titulo="Datos generales">
                   <table className="panel-tabla">
                     <tbody>
                       <tr>
-                        <td className="panel-tabla-label">Fecha</td>
-                        <td>{observaciones[0].fecha_observacion}</td>
+                        <td className="panel-tabla-label">ID</td>
+                        <td>{detalle.id}</td>
                       </tr>
-                      {observaciones[0].especie_nombre && (
+                      <tr>
+                        <td className="panel-tabla-label">Latitud</td>
+                        <td>{detalle.latitud}</td>
+                      </tr>
+                      <tr>
+                        <td className="panel-tabla-label">Longitud</td>
+                        <td>{detalle.longitud}</td>
+                      </tr>
+                      <tr>
+                        <td className="panel-tabla-label">Estado</td>
+                        <td style={{ color: colorEstado(detalle.estado), fontWeight: 600 }}>
+                          {textoEstado(detalle.estado)}
+                        </td>
+                      </tr>
+                      {detalle.fecha_descubrimiento && (
                         <tr>
-                          <td className="panel-tabla-label">Especie</td>
-                          <td>{observaciones[0].especie_nombre}</td>
+                          <td className="panel-tabla-label">Descubrimiento</td>
+                          <td>{formatoFecha(detalle.fecha_descubrimiento)}</td>
                         </tr>
                       )}
-                      <tr>
-                        <td className="panel-tabla-label">Ocupado</td>
-                        <td>{observaciones[0].ocupado ? 'Sí' : 'No'}</td>
-                      </tr>
-                      <tr>
-                        <td className="panel-tabla-label">Huevos</td>
-                        <td>{observaciones[0].hay_huevos ? observaciones[0].cantidad_huevos : 'No'}</td>
-                      </tr>
-                      <tr>
-                        <td className="panel-tabla-label">Polluelos</td>
-                        <td>{observaciones[0].hay_polluelos ? observaciones[0].cantidad_polluelos : 'No'}</td>
-                      </tr>
-                      {observaciones[0].notas && (
+                      {detalle.fecha_estado && (
                         <tr>
-                          <td className="panel-tabla-label">Notas</td>
-                          <td>{observaciones[0].notas}</td>
+                          <td className="panel-tabla-label">Fecha estado</td>
+                          <td>{formatoFecha(detalle.fecha_estado)}</td>
+                        </tr>
+                      )}
+                      {detalle.motivo_estado && (
+                        <tr>
+                          <td className="panel-tabla-label">Motivo estado</td>
+                          <td>{detalle.motivo_estado}</td>
+                        </tr>
+                      )}
+                      {detalle.metodo_ubicacion && (
+                        <tr>
+                          <td className="panel-tabla-label">Método ubicación</td>
+                          <td>{METODO_UBICACION_TEXTO[detalle.metodo_ubicacion] || detalle.metodo_ubicacion}</td>
+                        </tr>
+                      )}
+                      {detalle.descripcion && (
+                        <tr>
+                          <td className="panel-tabla-label">Descripción</td>
+                          <td>{detalle.descripcion}</td>
                         </tr>
                       )}
                     </tbody>
                   </table>
                 </Seccion>
-              )}
 
-              <Seccion titulo="Histórico de observaciones">
-                {puedeCrear && (
-                  <button
-                    className="panel-boton-nuevo"
-                    onClick={() => setMostrandoFormObs(true)}
-                  >
-                    + Nueva observación
-                  </button>
+                {observaciones.length > 0 && (
+                  <Seccion titulo="Última observación">
+                    <table className="panel-tabla">
+                      <tbody>
+                        <tr>
+                          <td className="panel-tabla-label">Fecha</td>
+                          <td>{observaciones[0].fecha_observacion}</td>
+                        </tr>
+                        {observaciones[0].especie_nombre && (
+                          <tr>
+                            <td className="panel-tabla-label">Especie</td>
+                            <td>{observaciones[0].especie_nombre}</td>
+                          </tr>
+                        )}
+                        <tr>
+                          <td className="panel-tabla-label">Ocupado</td>
+                          <td>{observaciones[0].ocupado ? 'Sí' : 'No'}</td>
+                        </tr>
+                        <tr>
+                          <td className="panel-tabla-label">Huevos</td>
+                          <td>{observaciones[0].hay_huevos ? observaciones[0].cantidad_huevos : 'No'}</td>
+                        </tr>
+                        <tr>
+                          <td className="panel-tabla-label">Polluelos</td>
+                          <td>{observaciones[0].hay_polluelos ? observaciones[0].cantidad_polluelos : 'No'}</td>
+                        </tr>
+                        {observaciones[0].notas && (
+                          <tr>
+                            <td className="panel-tabla-label">Notas</td>
+                            <td>{observaciones[0].notas}</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </Seccion>
                 )}
-                <NestObservationsHistory observaciones={observaciones} />
-              </Seccion>
 
-              <Seccion titulo="Histórico de eventos">
-                {puedeCrear && (
-                  <button
-                    className="panel-boton-nuevo"
-                    onClick={() => setMostrandoFormEvento(true)}
-                  >
-                    + Nuevo evento
-                  </button>
-                )}
-                <NestEventsHistory eventos={eventos} />
-              </Seccion>
+                <Seccion titulo="Histórico de observaciones">
+                  {puedeCrear && (
+                    <button
+                      className="panel-boton-nuevo"
+                      onClick={() => setMostrandoFormObs(true)}
+                    >
+                      + Nueva observación
+                    </button>
+                  )}
+                  <NestObservationsHistory observaciones={observaciones} onVerDetalle={setObsDetalle} />
+                </Seccion>
 
-              <Seccion titulo="Imágenes">
-                {puedeCrear && (
-                  <button
-                    className="panel-boton-nuevo"
-                    onClick={() => setMostrandoFormImg(true)}
-                  >
-                    + Añadir imagen
-                  </button>
-                )}
-                {mostrandoFormImg && (
-                  <NestImageUploadForm
-                    nidoId={nidoId}
-                    onCrear={handleCrearImagen}
-                    onCerrar={() => setMostrandoFormImg(false)}
+                <Seccion titulo="Histórico de eventos">
+                  {puedeCrear && (
+                    <button
+                      className="panel-boton-nuevo"
+                      onClick={() => setMostrandoFormEvento(true)}
+                    >
+                      + Nuevo evento
+                    </button>
+                  )}
+                  <NestEventsHistory eventos={eventos} />
+                </Seccion>
+
+                <Seccion titulo="Imágenes">
+                  {puedeCrear && (
+                    <button
+                      className="panel-boton-nuevo"
+                      onClick={() => setMostrandoFormImg(true)}
+                    >
+                      + Añadir imagen
+                    </button>
+                  )}
+                  {mostrandoFormImg && (
+                    <NestImageUploadForm
+                      nidoId={nidoId}
+                      onCrear={handleCrearImagen}
+                      onCerrar={() => setMostrandoFormImg(false)}
+                    />
+                  )}
+                  <NestImagesGallery
+                    imagenes={imagenes}
+                    puedeEditar={puedeCrear}
+                    onMarcarPrincipal={handleMarcarPrincipal}
                   />
-                )}
-                <NestImagesGallery
-                  imagenes={imagenes}
-                  puedeEditar={puedeCrear}
-                  onMarcarPrincipal={handleMarcarPrincipal}
-                />
-              </Seccion>
-            </>
-          )}
+                </Seccion>
+              </>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+
+      {obsDetalle && (
+        <ObservationDetailModal
+          observacion={obsDetalle}
+          imagenes={imagenes}
+          onCerrar={() => setObsDetalle(null)}
+        />
+      )}
+    </>
   )
 }
