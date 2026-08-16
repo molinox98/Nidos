@@ -1,7 +1,7 @@
 import { formatoFechaHora, textoTipoEvento, textoEstado } from '../utils/date'
 
 // LISTA CRONOLÓGICA DE EVENTOS DEL NIDO
-export default function NestEventsHistory({ eventos }) {
+export default function NestEventsHistory({ eventos, onVerDetalle }) {
   if (!eventos || eventos.length === 0) {
     return <p className="panel-vacio">No hay eventos registrados.</p>
   }
@@ -23,8 +23,13 @@ export default function NestEventsHistory({ eventos }) {
           {ev.descripcion && (
             <p className="panel-historico-notas">{ev.descripcion}</p>
           )}
-          {ev.usuario_nombre && (
-            <span className="panel-historico-usuario">{ev.usuario_nombre}</span>
+          <span className="panel-historico-usuario">
+            {ev.usuario_nombre || 'Usuario no disponible'}
+          </span>
+          {onVerDetalle && (
+            <button className="panel-historico-boton-detalle" onClick={() => onVerDetalle(ev)}>
+              Ver detalle
+            </button>
           )}
         </div>
       ))}

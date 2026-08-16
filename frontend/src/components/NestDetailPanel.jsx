@@ -12,6 +12,7 @@ import NestObservationForm from './NestObservationForm'
 import NestEventForm from './NestEventForm'
 import NestImageUploadForm from './NestImageUploadForm'
 import ObservationDetailModal from './ObservationDetailModal'
+import EventDetailModal from './EventDetailModal'
 
 const METODO_UBICACION_TEXTO = {
   manual_mapa: 'Mapa',
@@ -57,6 +58,7 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar }) {
   const [mostrandoFormEvento, setMostrandoFormEvento] = useState(false)
   const [mostrandoFormImg, setMostrandoFormImg] = useState(false)
   const [obsDetalle, setObsDetalle] = useState(null)
+  const [evtDetalle, setEvtDetalle] = useState(null)
 
   const puedeCrear = usuario && (usuario.rol === 'admin' || usuario.rol === 'bander')
 
@@ -318,7 +320,7 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar }) {
                       + Nuevo evento
                     </button>
                   )}
-                  <NestEventsHistory eventos={eventos} />
+                  <NestEventsHistory eventos={eventos} onVerDetalle={setEvtDetalle} />
                 </Seccion>
 
                 <Seccion titulo="Imágenes">
@@ -354,6 +356,12 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar }) {
           observacion={obsDetalle}
           imagenes={imagenes}
           onCerrar={() => setObsDetalle(null)}
+        />
+      )}
+      {evtDetalle && (
+        <EventDetailModal
+          evento={evtDetalle}
+          onCerrar={() => setEvtDetalle(null)}
         />
       )}
     </>

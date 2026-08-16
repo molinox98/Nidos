@@ -1097,9 +1097,9 @@
   margin: 0;
 }
 
-/* Detalle de observación en modal */
+/* Detalle en modal compartido por observaciones y eventos */
 
-.obs-detalle-overlay {
+.detalle-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -1113,7 +1113,7 @@
   padding: 1rem;
 }
 
-.obs-detalle-modal {
+.detalle-modal-contenido {
   width: min(560px, 92vw);
   max-height: 85vh;
   background: #fff;
@@ -1124,7 +1124,7 @@
   overflow: hidden;
 }
 
-.obs-detalle-cabecera {
+.detalle-modal-cabecera {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1134,13 +1134,13 @@
   flex-shrink: 0;
 }
 
-.obs-detalle-titulo {
+.detalle-modal-titulo {
   margin: 0;
   font-size: 1.05rem;
   font-weight: 600;
 }
 
-.obs-detalle-cerrar {
+.detalle-modal-cerrar {
   background: rgba(255, 255, 255, 0.15);
   border: none;
   color: #fff;
@@ -1155,30 +1155,30 @@
   transition: background 0.15s;
 }
 
-.obs-detalle-cerrar:hover {
+.detalle-modal-cerrar:hover {
   background: rgba(255, 255, 255, 0.3);
 }
 
-.obs-detalle-cuerpo {
+.detalle-modal-cuerpo {
   flex: 1;
   overflow-y: auto;
   padding: 1.15rem 1.25rem;
 }
 
-.obs-detalle-imagenes {
+.detalle-modal-seccion {
   margin-top: 1.25rem;
   padding-top: 1rem;
   border-top: 1px solid #eee;
 }
 
-.obs-detalle-imagenes-titulo {
+.detalle-modal-seccion-titulo {
   margin: 0 0 0.6rem;
   font-size: 0.9rem;
   color: #24302a;
   font-weight: 600;
 }
 
-.obs-detalle-acciones {
+.detalle-modal-acciones {
   padding: 0.85rem 1.25rem;
   border-top: 1px solid #eee;
   display: flex;
@@ -1186,7 +1186,7 @@
   flex-shrink: 0;
 }
 
-/* Botón ver detalle en el histórico de observaciones */
+/* Botón ver detalle en los históricos */
 
 .panel-historico-boton-detalle {
   display: block;

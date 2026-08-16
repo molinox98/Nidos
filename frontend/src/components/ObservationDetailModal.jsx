@@ -23,14 +23,14 @@ export default function ObservationDetailModal({ observacion, imagenes, onCerrar
   const imagenesObs = imagenes.filter((i) => String(i.observacion) === String(observacion.id))
 
   return (
-    <div className="obs-detalle-overlay" onClick={onCerrar}>
-      <div className="obs-detalle-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="obs-detalle-cabecera">
-          <h3 className="obs-detalle-titulo">Detalle de observación</h3>
-          <button className="obs-detalle-cerrar" onClick={onCerrar} aria-label="Cerrar">✕</button>
+    <div className="detalle-modal-overlay" onClick={onCerrar}>
+      <div className="detalle-modal-contenido" onClick={(e) => e.stopPropagation()}>
+        <div className="detalle-modal-cabecera">
+          <h3 className="detalle-modal-titulo">Detalle de observación</h3>
+          <button className="detalle-modal-cerrar" onClick={onCerrar} aria-label="Cerrar">✕</button>
         </div>
 
-        <div className="obs-detalle-cuerpo">
+        <div className="detalle-modal-cuerpo">
           <table className="panel-tabla">
             <tbody>
               <tr>
@@ -76,8 +76,8 @@ export default function ObservationDetailModal({ observacion, imagenes, onCerrar
             </tbody>
           </table>
 
-          <div className="obs-detalle-imagenes">
-            <h4 className="obs-detalle-imagenes-titulo">Imágenes de la observación</h4>
+          <div className="detalle-modal-seccion">
+            <h4 className="detalle-modal-seccion-titulo">Imágenes de la observación</h4>
             {imagenesObs.length === 0 ? (
               <p className="panel-vacio">Esta observación no tiene imágenes asociadas.</p>
             ) : (
@@ -106,7 +106,7 @@ export default function ObservationDetailModal({ observacion, imagenes, onCerrar
           </div>
         </div>
 
-        <div className="obs-detalle-acciones">
+        <div className="detalle-modal-acciones">
           <button className="form-boton-cancelar" onClick={onCerrar}>Cerrar</button>
         </div>
       </div>
