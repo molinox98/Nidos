@@ -1183,14 +1183,33 @@
   border-top: 1px solid #eee;
   display: flex;
   justify-content: flex-end;
+  gap: 0.5rem;
   flex-shrink: 0;
+}
+
+/* Botón editar en modales de detalle */
+
+.detalle-modal-boton-editar {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  color: #1f5c3b;
+  border: 1px solid #cfe0d4;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.detalle-modal-boton-editar:hover {
+  background: #1f5c3b;
+  color: #fff;
 }
 
 /* Botón ver detalle en los históricos */
 
 .panel-historico-boton-detalle {
-  display: block;
-  margin-top: 0.4rem;
+  display: inline-block;
   padding: 0.25rem 0.6rem;
   background: #eef4ef;
   color: #1f5c3b;
@@ -1204,6 +1223,35 @@
 
 .panel-historico-boton-detalle:hover {
   background: #dceadd;
+}
+
+/* Botón editar en los históricos */
+
+.panel-historico-boton-editar {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  background: transparent;
+  color: #1f5c3b;
+  border: 1px solid #cfe0d4;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.panel-historico-boton-editar:hover {
+  background: #1f5c3b;
+  color: #fff;
+}
+
+/* Fila de acciones en históricos */
+
+.panel-historico-acciones-fila {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
 }
 
 

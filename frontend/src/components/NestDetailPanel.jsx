@@ -59,6 +59,7 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar, onEditar
   const [mostrandoFormImg, setMostrandoFormImg] = useState(false)
   const [obsDetalle, setObsDetalle] = useState(null)
   const [evtDetalle, setEvtDetalle] = useState(null)
+  const [obsEditando, setObsEditando] = useState(null)
 
   const puedeCrear = usuario && (usuario.rol === 'admin' || usuario.rol === 'bander')
 
@@ -124,6 +125,18 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar, onEditar
     if (onRecargar) onRecargar()
   }
 
+  // EDITAR OBSERVACIÓN DESDE FICHA O DETALLE
+  const handleEditarObs = (obs) => {
+    setObsDetalle(null)
+    setObsEditando(obs)
+  }
+
+  const handleGuardarObservacion = () => {
+    setObsEditando(null)
+    cargarDatos()
+    if (onRecargar) onRecargar()
+  }
+
   const handleCrearEvento = () => {
     setMostrandoFormEvento(false)
     cargarDatos()
@@ -154,6 +167,20 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar, onEditar
         nidoId={nidoId}
         onCrear={handleCrearObservacion}
         onCerrar={() => setMostrandoFormObs(false)}
+      />
+    )
+  }
+
+  // MODO EDICIÓN DE OBSERVACIÓN
+  if (obsEditando) {
+    return (
+      <NestObservationForm
+        nidoId={nidoId}
+        modo="editar"
+        observacionInicial={obsEditando}
+        fechaDescubrimiento={detalle ? detalle.fecha_descubrimiento : null}
+        onGuardar={handleGuardarObservacion}
+        onCerrar={() => setObsEditando(null)}
       />
     )
   }
@@ -331,7 +358,7 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar, onEditar
                       + Nueva observación
                     </button>
                   )}
-                  <NestObservationsHistory observaciones={observaciones} onVerDetalle={setObsDetalle} />
+                  <NestObservationsHistory observaciones={observaciones} onVerDetalle={setObsDetalle} onEditar={puedeCrear ? handleEditarObs : null} />
                 </Seccion>
 
                 <Seccion titulo="Histórico de eventos">
@@ -379,6 +406,7 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar, onEditar
           observacion={obsDetalle}
           imagenes={imagenes}
           onCerrar={() => setObsDetalle(null)}
+          onEditar={puedeCrear ? handleEditarObs : null}
         />
       )}
       {evtDetalle && (

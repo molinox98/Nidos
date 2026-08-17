@@ -1,5 +1,5 @@
 // LISTA CRONOLÓGICA DE OBSERVACIONES DEL NIDO
-export default function NestObservationsHistory({ observaciones, onVerDetalle }) {
+export default function NestObservationsHistory({ observaciones, onVerDetalle, onEditar }) {
   if (!observaciones || observaciones.length === 0) {
     return <p className="panel-vacio">No hay observaciones registradas.</p>
   }
@@ -25,11 +25,18 @@ export default function NestObservationsHistory({ observaciones, onVerDetalle })
           <span className="panel-historico-usuario">
             {obs.usuario_nombre || 'Usuario no disponible'}
           </span>
-          {onVerDetalle && (
-            <button className="panel-historico-boton-detalle" onClick={() => onVerDetalle(obs)}>
-              Ver detalle
-            </button>
-          )}
+          <div className="panel-historico-acciones-fila">
+            {onVerDetalle && (
+              <button className="panel-historico-boton-detalle" onClick={() => onVerDetalle(obs)}>
+                Ver detalle
+              </button>
+            )}
+            {onEditar && (
+              <button className="panel-historico-boton-editar" onClick={() => onEditar(obs)}>
+                Editar
+              </button>
+            )}
+          </div>
         </div>
       ))}
     </div>

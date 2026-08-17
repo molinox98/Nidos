@@ -16,7 +16,7 @@ function textoConCantidad(hay, cantidad) {
 }
 
 // DETALLE COMPLETO DE UNA OBSERVACIÓN EN MODAL
-export default function ObservationDetailModal({ observacion, imagenes, onCerrar }) {
+export default function ObservationDetailModal({ observacion, imagenes, onCerrar, onEditar }) {
   const [imagenSeleccionada, setImagenSeleccionada] = useState(null)
 
   // IMÁGENES DE LA OBSERVACIÓN
@@ -107,6 +107,9 @@ export default function ObservationDetailModal({ observacion, imagenes, onCerrar
         </div>
 
         <div className="detalle-modal-acciones">
+          {onEditar && (
+            <button className="detalle-modal-boton-editar" onClick={() => onEditar(observacion)}>Editar observación</button>
+          )}
           <button className="form-boton-cancelar" onClick={onCerrar}>Cerrar</button>
         </div>
       </div>
