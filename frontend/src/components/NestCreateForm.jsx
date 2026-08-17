@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { createNido } from '../api/nidos'
+import { createNido, updateNido } from '../api/nidos'
+import { formatoFecha } from '../utils/date'
 
 const ESTADOS = ['activo', 'inactivo', 'destruido', 'retirado']
 const METODOS_UBICACION = ['manual_mapa', 'gps_movil', 'importado']
@@ -32,30 +33,80 @@ function siguienteCodigoGrupo(nidos) {
   return max > 0 ? String(max + 1) : ''
 }
 
-export default function NestCreateForm({ grupo, onCrear, onCerrar, onIniciarSeleccion, onCancelarSeleccion, seleccionandoUbicacion, ubicacionTemporal, ocultoMovil }) {
-  // CÓDIGO Y NOMBRE SUGERIDOS PARA NUEVO NIDO EN GRUPO
-  const codigoSugerido = grupo ? siguienteCodigoGrupo(grupo.nidos) : ''
+// FORMATO DE ERRORES DE LA API
+function formatearError(err) {
+  if (err.data) {
+    const msgs = Object.entries(err.data).map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`)
+    return msgs.join(' | ')
+  }
+  return null
+}
 
-  const [nombre, setNombre] = useState(() => (codigoSugerido ? `${grupo.nombre} - Nido ${codigoSugerido}` : ''))
-  const [latitud, setLatitud] = useState(() => (grupo ? String(grupo.lat) : ''))
-  const [longitud, setLongitud] = useState(() => (grupo ? String(grupo.lng) : ''))
-  const [descripcion, setDescripcion] = useState('')
-  const [fechaDescubrimiento, setFechaDescubrimiento] = useState(hoyISO())
-  const [estado, setEstado] = useState('activo')
-  const [fechaEstado, setFechaEstado] = useState(hoyISO())
-  const [motivoEstado, setMotivoEstado] = useState('')
-  const [metodoUbicacion, setMetodoUbicacion] = useState('manual_mapa')
-  const [codigoEnGrupo, setCodigoEnGrupo] = useState(() => codigoSugerido)
-  const [posicionEnGrupo, setPosicionEnGrupo] = useState('')
+export default function NestCreateForm({
+  grupo,
+  modo = 'crear',
+  nidoInicial = null,
+  fechaMaximaDescubrimiento = null,
+  onCrear,
+  onGuardar,
+  onCerrar,
+  onIniciarSeleccion,
+  onCancelarSeleccion,
+  seleccionandoUbicacion,
+  ubicacionTemporal,
+  ocultoMovil,
+}) {
+  // MODO EDICIÓN
+  const esEdicion = modo === 'editar'
+
+  // DATOS INICIALES DEL NIDO
+  const enGrupo = esEdicion ? Boolean(nidoInicial && nidoInicial.grupo_nido) : Boolean(grupo)
+  const codigoSugerido = !esEdicion && grupo ? siguienteCodigoGrupo(grupo.nidos) : ''
+
+  const [nombre, setNombre] = useState(() => {
+    if (esEdicion) return (nidoInicial && nidoInicial.nombre) || ''
+    return codigoSugerido ? `${grupo.nombre} - Nido ${codigoSugerido}` : ''
+  })
+  const [latitud, setLatitud] = useState(() => {
+    if (esEdicion) return nidoInicial ? String(nidoInicial.latitud) : ''
+    return grupo ? String(grupo.lat) : ''
+  })
+  const [longitud, setLongitud] = useState(() => {
+    if (esEdicion) return nidoInicial ? String(nidoInicial.longitud) : ''
+    return grupo ? String(grupo.lng) : ''
+  })
+  const [descripcion, setDescripcion] = useState(() => (
+    esEdicion && nidoInicial ? (nidoInicial.descripcion || '') : ''
+  ))
+  const [fechaDescubrimiento, setFechaDescubrimiento] = useState(() => (
+    esEdicion && nidoInicial ? (nidoInicial.fecha_descubrimiento || '') : hoyISO()
+  ))
+  const [estado, setEstado] = useState(() => (nidoInicial ? nidoInicial.estado : 'activo'))
+  const [fechaEstado, setFechaEstado] = useState(() => (
+    nidoInicial ? (nidoInicial.fecha_estado || '') : hoyISO()
+  ))
+  const [motivoEstado, setMotivoEstado] = useState(() => (
+    nidoInicial ? (nidoInicial.motivo_estado || '') : ''
+  ))
+  const [metodoUbicacion, setMetodoUbicacion] = useState(() => (
+    nidoInicial ? (nidoInicial.metodo_ubicacion || 'manual_mapa') : 'manual_mapa'
+  ))
+  const [codigoEnGrupo, setCodigoEnGrupo] = useState(() => {
+    if (esEdicion) return nidoInicial ? (nidoInicial.codigo_en_grupo || '') : ''
+    return codigoSugerido
+  })
+  const [posicionEnGrupo, setPosicionEnGrupo] = useState(() => (
+    esEdicion && nidoInicial ? (nidoInicial.posicion_en_grupo || '') : ''
+  ))
   const [error, setError] = useState(null)
   const [guardando, setGuardando] = useState(false)
 
   useEffect(() => {
-    if (!grupo && ubicacionTemporal) {
+    if ((esEdicion || !grupo) && ubicacionTemporal) {
       setLatitud(String(ubicacionTemporal.lat))
       setLongitud(String(ubicacionTemporal.lng))
     }
-  }, [ubicacionTemporal, grupo])
+  }, [ubicacionTemporal, grupo, esEdicion])
 
   // ENVÍA EL NIDO AL BACKEND
   const handleSubmit = async (e) => {
@@ -69,34 +120,54 @@ export default function NestCreateForm({ grupo, onCrear, onCerrar, onIniciarSele
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) { setError('Latitud y longitud deben ser numéricas.'); return }
     if (!fechaDescubrimiento) { setError('La fecha de descubrimiento es obligatoria.'); return }
 
+    // VALIDACIÓN DE FECHA DE DESCUBRIMIENTO EN EDICIÓN
+    if (esEdicion && fechaMaximaDescubrimiento && fechaDescubrimiento) {
+      if (fechaDescubrimiento > fechaMaximaDescubrimiento) {
+        setError(`La fecha de descubrimiento no puede ser posterior al ${formatoFecha(fechaMaximaDescubrimiento)}, porque ya existe una observación o evento anterior.`)
+        return
+      }
+    }
+
     setGuardando(true)
     try {
-      const body = {
-        nombre: nombre.trim(),
-        latitud: parseFloat(lat.toFixed(6)),
-        longitud: parseFloat(lng.toFixed(6)),
-        estado,
-        metodo_ubicacion: metodoUbicacion,
-        fecha_descubrimiento: fechaDescubrimiento,
-      }
-      if (descripcion.trim()) body.descripcion = descripcion.trim()
-      if (fechaEstado) body.fecha_estado = fechaEstado
-      if (motivoEstado.trim()) body.motivo_estado = motivoEstado.trim()
-      if (grupo) {
-        body.grupo_nido = grupo.id
-        if (codigoEnGrupo.trim()) body.codigo_en_grupo = codigoEnGrupo.trim()
-        if (posicionEnGrupo.trim()) body.posicion_en_grupo = posicionEnGrupo.trim()
-      }
-
-      const nuevo = await createNido(body)
-      onCrear(nuevo)
-    } catch (err) {
-      if (err.data) {
-        const msgs = Object.entries(err.data).map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`)
-        setError(msgs.join(' | '))
+      if (esEdicion) {
+        // GUARDAR CAMBIOS
+        const body = {
+          nombre: nombre.trim(),
+          latitud: parseFloat(lat.toFixed(6)),
+          longitud: parseFloat(lng.toFixed(6)),
+          fecha_descubrimiento: fechaDescubrimiento,
+          descripcion: descripcion.trim(),
+        }
+        if (enGrupo) {
+          body.codigo_en_grupo = codigoEnGrupo.trim()
+          body.posicion_en_grupo = posicionEnGrupo.trim()
+        }
+        const actualizado = await updateNido(nidoInicial.id, body)
+        if (onGuardar) onGuardar(actualizado)
       } else {
-        setError('Error al crear el nido.')
+        const body = {
+          nombre: nombre.trim(),
+          latitud: parseFloat(lat.toFixed(6)),
+          longitud: parseFloat(lng.toFixed(6)),
+          estado,
+          metodo_ubicacion: metodoUbicacion,
+          fecha_descubrimiento: fechaDescubrimiento,
+        }
+        if (descripcion.trim()) body.descripcion = descripcion.trim()
+        if (fechaEstado) body.fecha_estado = fechaEstado
+        if (motivoEstado.trim()) body.motivo_estado = motivoEstado.trim()
+        if (grupo) {
+          body.grupo_nido = grupo.id
+          if (codigoEnGrupo.trim()) body.codigo_en_grupo = codigoEnGrupo.trim()
+          if (posicionEnGrupo.trim()) body.posicion_en_grupo = posicionEnGrupo.trim()
+        }
+
+        const nuevo = await createNido(body)
+        onCrear(nuevo)
       }
+    } catch (err) {
+      setError(formatearError(err) || (esEdicion ? 'Error al guardar los cambios.' : 'Error al crear el nido.'))
     } finally {
       setGuardando(false)
     }
@@ -106,12 +177,14 @@ export default function NestCreateForm({ grupo, onCrear, onCerrar, onIniciarSele
     <div className={`panel-overlay ${ocultoMovil ? 'panel-overlay--oculto-movil' : seleccionandoUbicacion ? 'panel-overlay--transparente' : ''}`} onClick={seleccionandoUbicacion ? undefined : onCerrar}>
       <div className="panel-lateral" onClick={(e) => e.stopPropagation()}>
         <div className="panel-cabecera">
-          <h3 className="panel-titulo">{grupo ? 'Nuevo nido en grupo' : 'Nuevo nido'}</h3>
+          <h3 className="panel-titulo">
+            {esEdicion ? 'Editar nido' : grupo ? 'Nuevo nido en grupo' : 'Nuevo nido'}
+          </h3>
           <button className="panel-cerrar" onClick={onCerrar} aria-label="Cerrar">✕</button>
         </div>
         <div className="panel-cuerpo">
           <form className="form-nido" onSubmit={handleSubmit}>
-            {grupo && (
+            {!esEdicion && grupo && (
               <div className="form-campo">
                 <label>Grupo</label>
                 <div className="form-texto-fijo">{grupo.nombre}</div>
@@ -134,7 +207,7 @@ export default function NestCreateForm({ grupo, onCrear, onCerrar, onIniciarSele
               </div>
             </div>
 
-            {!grupo && (
+            {(!grupo || esEdicion) && (
               <>
                 <button
                   type="button"
@@ -150,7 +223,7 @@ export default function NestCreateForm({ grupo, onCrear, onCerrar, onIniciarSele
               </>
             )}
 
-            {grupo && (
+            {enGrupo && (
               <div className="form-fila">
                 <div className="form-campo form-campo--mitad">
                   <label>Código en grupo</label>
@@ -173,47 +246,56 @@ export default function NestCreateForm({ grupo, onCrear, onCerrar, onIniciarSele
               <textarea rows={2} value={descripcion} onChange={(e) => setDescripcion(e.target.value)} />
             </div>
 
-            <div className="form-fila">
-              <div className="form-campo form-campo--mitad">
+            {esEdicion ? (
+              <div className="form-campo">
                 <label>Fecha descubrimiento *</label>
                 <input type="date" value={fechaDescubrimiento} onChange={(e) => setFechaDescubrimiento(e.target.value)} />
               </div>
-              <div className="form-campo form-campo--mitad">
-                <label>Estado *</label>
-                <select value={estado} onChange={(e) => setEstado(e.target.value)}>
-                  {ESTADOS.map((e) => (
-                    <option key={e} value={e}>{ESTADO_TEXTO[e]}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
+            ) : (
+              <>
+                <div className="form-fila">
+                  <div className="form-campo form-campo--mitad">
+                    <label>Fecha descubrimiento *</label>
+                    <input type="date" value={fechaDescubrimiento} onChange={(e) => setFechaDescubrimiento(e.target.value)} />
+                  </div>
+                  <div className="form-campo form-campo--mitad">
+                    <label>Estado *</label>
+                    <select value={estado} onChange={(e) => setEstado(e.target.value)}>
+                      {ESTADOS.map((e) => (
+                        <option key={e} value={e}>{ESTADO_TEXTO[e]}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
 
-            <div className="form-fila">
-              <div className="form-campo form-campo--mitad">
-                <label>Fecha estado</label>
-                <input type="date" value={fechaEstado} onChange={(e) => setFechaEstado(e.target.value)} />
-              </div>
-              <div className="form-campo form-campo--mitad">
-                <label>Método ubicación</label>
-                <select value={metodoUbicacion} onChange={(e) => setMetodoUbicacion(e.target.value)}>
-                  {METODOS_UBICACION.map((m) => (
-                    <option key={m} value={m}>{METODO_TEXTO[m]}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
+                <div className="form-fila">
+                  <div className="form-campo form-campo--mitad">
+                    <label>Fecha estado</label>
+                    <input type="date" value={fechaEstado} onChange={(e) => setFechaEstado(e.target.value)} />
+                  </div>
+                  <div className="form-campo form-campo--mitad">
+                    <label>Método ubicación</label>
+                    <select value={metodoUbicacion} onChange={(e) => setMetodoUbicacion(e.target.value)}>
+                      {METODOS_UBICACION.map((m) => (
+                        <option key={m} value={m}>{METODO_TEXTO[m]}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
 
-            <div className="form-campo">
-              <label>Motivo estado</label>
-              <textarea rows={2} value={motivoEstado} onChange={(e) => setMotivoEstado(e.target.value)} />
-            </div>
+                <div className="form-campo">
+                  <label>Motivo estado</label>
+                  <textarea rows={2} value={motivoEstado} onChange={(e) => setMotivoEstado(e.target.value)} />
+                </div>
+              </>
+            )}
 
             {error && <p className="form-error">{error}</p>}
 
             <div className="form-acciones">
               <button type="button" className="form-boton-cancelar" onClick={onCerrar}>Cancelar</button>
               <button type="submit" className="form-boton-guardar" disabled={guardando}>
-                {guardando ? 'Guardando...' : 'Guardar nido'}
+                {guardando ? 'Guardando...' : esEdicion ? 'Guardar cambios' : 'Guardar nido'}
               </button>
             </div>
           </form>

@@ -406,6 +406,8 @@ function NestsMap({ sidebarAbierto }) {
   const [zoom, setZoom] = useState(12)
   const [nidoSeleccionado, setNidoSeleccionado] = useState(null)
   const [nidoDetalleId, setNidoDetalleId] = useState(null)
+  const [nidoEditando, setNidoEditando] = useState(null)
+  const [fechaMaximaDescubrimiento, setFechaMaximaDescubrimiento] = useState(null)
   const [mostrandoFormulario, setMostrandoFormulario] = useState(false)
   const [mostrandoFormularioGrupo, setMostrandoFormularioGrupo] = useState(false)
   const [seleccionandoUbicacion, setSeleccionandoUbicacion] = useState(false)
@@ -463,6 +465,36 @@ function NestsMap({ sidebarAbierto }) {
     setUbicacionTemporal(null)
     setGrupoNidoForm(null)
     recargarNidos()
+  }
+
+  // ABRE EL FORMULARIO DE EDICIÓN DESDE LA FICHA
+  const handleAbrirEdicion = (detalle, fechaMaxima) => {
+    setNidoDetalleId(null)
+    setSeleccionandoUbicacion(false)
+    setUbicacionTemporal(null)
+    setFechaMaximaDescubrimiento(fechaMaxima || null)
+    setNidoEditando(detalle)
+  }
+
+  // CANCELA LA EDICIÓN Y VUELVE A LA FICHA
+  const handleCerrarEdicion = () => {
+    const id = nidoEditando ? nidoEditando.id : null
+    setNidoEditando(null)
+    setFechaMaximaDescubrimiento(null)
+    setSeleccionandoUbicacion(false)
+    setUbicacionTemporal(null)
+    if (id) setNidoDetalleId(id)
+  }
+
+  // GUARDA LA EDICIÓN, RECARGA EL MAPA Y REABRE LA FICHA
+  const handleGuardarEdicion = () => {
+    const id = nidoEditando ? nidoEditando.id : null
+    setNidoEditando(null)
+    setFechaMaximaDescubrimiento(null)
+    setSeleccionandoUbicacion(false)
+    setUbicacionTemporal(null)
+    recargarNidos()
+    if (id) setNidoDetalleId(id)
   }
 
   // ABRE EL FORMULARIO DE NUEVO NIDO EN UN GRUPO EXISTENTE CON GRUPO Y COORDENADAS
@@ -638,7 +670,7 @@ function NestsMap({ sidebarAbierto }) {
         </div>
       )}
 
-      {puedeCrear && !mostrandoFormulario && !mostrandoFormularioGrupo && (
+      {puedeCrear && !mostrandoFormulario && !mostrandoFormularioGrupo && !nidoEditando && (
         <div className="mapa-botones-flotantes">
           <button className="mapa-boton-nuevo" onClick={() => setMostrandoFormularioGrupo(true)}>
             + Nuevo grupo
@@ -667,6 +699,24 @@ function NestsMap({ sidebarAbierto }) {
           nidoId={nidoDetalleId}
           onCerrar={() => setNidoDetalleId(null)}
           onRecargar={recargarNidos}
+          onEditar={handleAbrirEdicion}
+        />
+      )}
+      {nidoEditando && (
+        <NestCreateForm
+          modo="editar"
+          nidoInicial={nidoEditando}
+          fechaMaximaDescubrimiento={fechaMaximaDescubrimiento}
+          onGuardar={handleGuardarEdicion}
+          onCerrar={handleCerrarEdicion}
+          onIniciarSeleccion={() => setSeleccionandoUbicacion(true)}
+          onCancelarSeleccion={() => {
+            setSeleccionandoUbicacion(false)
+            setUbicacionTemporal(null)
+          }}
+          seleccionandoUbicacion={seleccionandoUbicacion}
+          ubicacionTemporal={ubicacionTemporal}
+          ocultoMovil={esMovil && seleccionandoUbicacion}
         />
       )}
       {mostrandoFormulario && (

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { getNidoDetalle } from '../api/nidos'
 import { getObservaciones } from '../api/observaciones'
 import { getEventos } from '../api/eventos'
@@ -36,7 +36,7 @@ function PanelError({ mensaje }) {
   )
 }
 
-// SECCIÓN COLAPSABLE CON TÍTULO EN LA FICHA
+// SECCIÓN CON TÍTULO EN LA FICHA
 function Seccion({ titulo, children }) {
   return (
     <div className="panel-seccion">
@@ -46,7 +46,7 @@ function Seccion({ titulo, children }) {
   )
 }
 
-export default function NestDetailPanel({ nidoId, onCerrar, onRecargar }) {
+export default function NestDetailPanel({ nidoId, onCerrar, onRecargar, onEditar }) {
   const { usuario } = useAuth()
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
@@ -61,6 +61,20 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar }) {
   const [evtDetalle, setEvtDetalle] = useState(null)
 
   const puedeCrear = usuario && (usuario.rol === 'admin' || usuario.rol === 'bander')
+
+  // FECHA MÁS ANTIGUA ENTRE OBSERVACIONES Y EVENTOS DEL NIDO
+  const fechaMaximaDescubrimiento = useMemo(() => {
+    const fechas = []
+    for (const o of observaciones) {
+      if (o.fecha_observacion) fechas.push(String(o.fecha_observacion).split('T')[0])
+    }
+    for (const ev of eventos) {
+      if (ev.fecha_evento) fechas.push(String(ev.fecha_evento).split('T')[0])
+    }
+    if (fechas.length === 0) return null
+    fechas.sort()
+    return fechas[0]
+  }, [observaciones, eventos])
 
   // CARGA DETALLE, OBSERVACIONES, EVENTOS E IMÁGENES DEL NIDO
   const cargarDatos = () => {
@@ -195,6 +209,15 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar }) {
                     {textoEstado(detalle.estado)}
                   </span>
                 </div>
+
+                {puedeCrear && onEditar && (
+                  <button
+                    className="panel-boton-editar"
+                    onClick={() => onEditar(detalle, fechaMaximaDescubrimiento)}
+                  >
+                    Editar nido
+                  </button>
+                )}
 
                 {detalle.grupo_nombre && (
                   <p className="panel-grupo">
