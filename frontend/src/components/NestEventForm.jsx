@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { createEvento } from '../api/eventos'
+import { createEvento, updateEvento } from '../api/eventos'
 import { updateNido } from '../api/nidos'
 
 const TIPOS_EVENTO = ['cambio_estado', 'revision', 'incidencia', 'mantenimiento', 'otro']
@@ -27,52 +27,117 @@ function ahoraLocalISO() {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
-export default function NestEventForm({ nidoId, estadoActual, onCrear, onCerrar }) {
-  const [fechaEvento, setFechaEvento] = useState(ahoraLocalISO())
-  const [tipoEvento, setTipoEvento] = useState('revision')
-  const [descripcion, setDescripcion] = useState('')
-  const [estadoNuevo, setEstadoNuevo] = useState('')
+// MODO: crear / editar
+export default function NestEventForm({
+  nidoId,
+  estadoActual,
+  onCrear,
+  onCerrar,
+  modo = 'crear',
+  eventoInicial = null,
+  onGuardar,
+  fechaDescubrimiento = null,
+}) {
+  // MODO EDICIÓN
+  const esEdicion = modo === 'editar'
+
+  const [fechaEvento, setFechaEvento] = useState(() => {
+    if (esEdicion && eventoInicial) {
+      const f = eventoInicial.fecha_evento
+      return f ? String(f).slice(0, 16) : ahoraLocalISO()
+    }
+    return ahoraLocalISO()
+  })
+  const [tipoEvento, setTipoEvento] = useState(() => (
+    esEdicion && eventoInicial ? eventoInicial.tipo_evento : 'revision'
+  ))
+  const [descripcion, setDescripcion] = useState(() => {
+    if (esEdicion && eventoInicial) return eventoInicial.descripcion || ''
+    return ''
+  })
+  const [estadoAnterior, setEstadoAnterior] = useState(() => (
+    esEdicion && eventoInicial ? eventoInicial.estado_anterior || '' : ''
+  ))
+  const [estadoNuevo, setEstadoNuevo] = useState(() => (
+    esEdicion && eventoInicial ? eventoInicial.estado_nuevo || '' : ''
+  ))
   const [error, setError] = useState(null)
   const [guardando, setGuardando] = useState(false)
 
-  // ENVÍA EL EVENTO Y ACTUALIZA EL ESTADO DEL NIDO
+  // ENVÍA EL EVENTO AL BACKEND
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError(null)
 
     if (!fechaEvento) { setError('La fecha del evento es obligatoria.'); return }
 
+    // VALIDACIÓN DE FECHA DE EVENTO
+    if (esEdicion && fechaDescubrimiento) {
+      const fechaEventoSolo = fechaEvento.split('T')[0]
+      if (fechaEventoSolo < fechaDescubrimiento) {
+        setError('La fecha del evento no puede ser anterior a la fecha de descubrimiento del nido.')
+        return
+      }
+    }
+
     if (tipoEvento === 'cambio_estado') {
-      if (!estadoNuevo) { setError('Debes seleccionar un estado nuevo.'); return }
-      if (estadoNuevo === estadoActual) { setError('El estado nuevo debe ser distinto del estado actual.'); return }
+      const anterior = esEdicion ? estadoAnterior : estadoActual
+      const nuevo = estadoNuevo
+      if (!nuevo) { setError('Debes seleccionar un estado nuevo.'); return }
+      if (esEdicion && !anterior) { setError('Debes seleccionar un estado anterior.'); return }
+      if (!esEdicion && nuevo === estadoActual) {
+        setError('El estado nuevo debe ser distinto del estado actual.')
+        return
+      }
     }
 
     setGuardando(true)
     try {
-      const body = {
-        nido: parseInt(nidoId, 10),
-        fecha_evento: fechaEvento,
-        tipo_evento: tipoEvento,
-      }
-      if (descripcion.trim()) body.descripcion = descripcion.trim()
-      if (tipoEvento === 'cambio_estado') {
-        body.estado_anterior = estadoActual
-        body.estado_nuevo = estadoNuevo
-      }
-
-      const nuevo = await createEvento(body)
-
-      if (tipoEvento === 'cambio_estado' && estadoNuevo) {
-        const fechaEstado = fechaEvento.split('T')[0]
-        const patchBody = {
-          estado: estadoNuevo,
-          fecha_estado: fechaEstado,
+      if (esEdicion) {
+        // GUARDAR CAMBIOS
+        const body = {
+          fecha_evento: fechaEvento,
+          tipo_evento: tipoEvento,
         }
-        if (descripcion.trim()) patchBody.motivo_estado = descripcion.trim()
-        await updateNido(nidoId, patchBody)
-      }
+        if (descripcion.trim()) body.descripcion = descripcion.trim()
+        else body.descripcion = ''
+        if (tipoEvento === 'cambio_estado') {
+          body.estado_anterior = estadoAnterior
+          body.estado_nuevo = estadoNuevo
+        } else {
+          body.estado_anterior = null
+          body.estado_nuevo = null
+        }
 
-      onCrear(nuevo)
+        const actualizado = await updateEvento(eventoInicial.id, body)
+        if (onGuardar) onGuardar(actualizado)
+      } else {
+        const body = {
+          nido: parseInt(nidoId, 10),
+          fecha_evento: fechaEvento,
+          tipo_evento: tipoEvento,
+        }
+        if (descripcion.trim()) body.descripcion = descripcion.trim()
+        if (tipoEvento === 'cambio_estado') {
+          body.estado_anterior = estadoActual
+          body.estado_nuevo = estadoNuevo
+        }
+
+        const nuevo = await createEvento(body)
+
+        // ACTUALIZA ESTADO DEL NIDO SOLO EN CREACIÓN
+        if (tipoEvento === 'cambio_estado' && estadoNuevo) {
+          const fechaEstado = fechaEvento.split('T')[0]
+          const patchBody = {
+            estado: estadoNuevo,
+            fecha_estado: fechaEstado,
+          }
+          if (descripcion.trim()) patchBody.motivo_estado = descripcion.trim()
+          await updateNido(nidoId, patchBody)
+        }
+
+        onCrear(nuevo)
+      }
     } catch (err) {
       if (err.data) {
         const msgs = Object.entries(err.data).map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`)
@@ -89,7 +154,9 @@ export default function NestEventForm({ nidoId, estadoActual, onCrear, onCerrar 
     <div className="panel-overlay" onClick={onCerrar}>
       <div className="panel-lateral" onClick={(e) => e.stopPropagation()}>
         <div className="panel-cabecera">
-          <h3 className="panel-titulo">Nuevo evento</h3>
+          <h3 className="panel-titulo">
+            {esEdicion ? 'Editar evento' : 'Nuevo evento'}
+          </h3>
           <button className="panel-cerrar" onClick={onCerrar} aria-label="Cerrar">✕</button>
         </div>
         <div className="panel-cuerpo">
@@ -116,14 +183,23 @@ export default function NestEventForm({ nidoId, estadoActual, onCrear, onCerrar 
             {tipoEvento === 'cambio_estado' && (
               <div className="form-fila">
                 <div className="form-campo form-campo--mitad">
-                  <label>Estado anterior</label>
-                  <div className="form-texto-fijo">{ESTADO_TEXTO[estadoActual] || '—'}</div>
+                  <label>Estado anterior {esEdicion ? '*' : ''}</label>
+                  {esEdicion ? (
+                    <select value={estadoAnterior} onChange={(e) => setEstadoAnterior(e.target.value)}>
+                      <option value="">Seleccionar...</option>
+                      {ESTADOS.filter((e) => e).map((e) => (
+                        <option key={e} value={e}>{ESTADO_TEXTO[e]}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="form-texto-fijo">{ESTADO_TEXTO[estadoActual] || '—'}</div>
+                  )}
                 </div>
                 <div className="form-campo form-campo--mitad">
                   <label>Estado nuevo *</label>
                   <select value={estadoNuevo} onChange={(e) => setEstadoNuevo(e.target.value)}>
                     <option value="">Seleccionar...</option>
-                    {ESTADOS.filter((e) => e && e !== estadoActual).map((e) => (
+                    {ESTADOS.filter((e) => e && e !== (esEdicion ? null : estadoActual)).map((e) => (
                       <option key={e} value={e}>{ESTADO_TEXTO[e]}</option>
                     ))}
                   </select>
@@ -136,7 +212,7 @@ export default function NestEventForm({ nidoId, estadoActual, onCrear, onCerrar 
             <div className="form-acciones">
               <button type="button" className="form-boton-cancelar" onClick={onCerrar}>Cancelar</button>
               <button type="submit" className="form-boton-guardar" disabled={guardando}>
-                {guardando ? 'Guardando...' : 'Guardar evento'}
+                {guardando ? 'Guardando...' : esEdicion ? 'Guardar cambios' : 'Guardar evento'}
               </button>
             </div>
           </form>

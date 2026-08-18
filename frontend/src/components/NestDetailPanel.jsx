@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { getNidoDetalle } from '../api/nidos'
+import { getNidoDetalle, updateNido } from '../api/nidos'
 import { getObservaciones } from '../api/observaciones'
 import { getEventos } from '../api/eventos'
 import { getImagenes, marcarImagenPrincipal } from '../api/imagenes'
@@ -60,6 +60,7 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar, onEditar
   const [obsDetalle, setObsDetalle] = useState(null)
   const [evtDetalle, setEvtDetalle] = useState(null)
   const [obsEditando, setObsEditando] = useState(null)
+  const [evtEditando, setEvtEditando] = useState(null)
 
   const puedeCrear = usuario && (usuario.rol === 'admin' || usuario.rol === 'bander')
 
@@ -137,6 +138,42 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar, onEditar
     if (onRecargar) onRecargar()
   }
 
+  // EDITAR EVENTO DESDE FICHA O DETALLE
+  const handleEditarEvt = (ev) => {
+    setEvtDetalle(null)
+    setEvtEditando(ev)
+  }
+
+  const handleGuardarEvento = async (eventoActualizado) => {
+    setEvtEditando(null)
+
+    // SI ES CAMBIO DE ESTADO, COMPROBAR SI ES EL ÚLTIMO
+    if (eventoActualizado.tipo_evento === 'cambio_estado' && eventoActualizado.estado_nuevo) {
+      const eventosActualizados = eventos.map((e) =>
+        e.id === eventoActualizado.id ? eventoActualizado : e
+      )
+      const ultimoCambio = eventosActualizados
+        .filter((e) => e.tipo_evento === 'cambio_estado')
+        .sort((a, b) => {
+          if (a.fecha_evento !== b.fecha_evento) return a.fecha_evento > b.fecha_evento ? -1 : 1
+          return a.id > b.id ? -1 : 1
+        })[0]
+
+      if (ultimoCambio && ultimoCambio.id === eventoActualizado.id) {
+        const fechaEstado = String(eventoActualizado.fecha_evento).split('T')[0]
+        const patchNido = {
+          estado: eventoActualizado.estado_nuevo,
+          fecha_estado: fechaEstado,
+        }
+        if (eventoActualizado.descripcion) patchNido.motivo_estado = eventoActualizado.descripcion
+        try { await updateNido(nidoId, patchNido) } catch { /* SILENCIOSO */ }
+      }
+    }
+
+    cargarDatos()
+    if (onRecargar) onRecargar()
+  }
+
   const handleCrearEvento = () => {
     setMostrandoFormEvento(false)
     cargarDatos()
@@ -181,6 +218,21 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar, onEditar
         fechaDescubrimiento={detalle ? detalle.fecha_descubrimiento : null}
         onGuardar={handleGuardarObservacion}
         onCerrar={() => setObsEditando(null)}
+      />
+    )
+  }
+
+  // MODO EDICIÓN DE EVENTO
+  if (evtEditando) {
+    return (
+      <NestEventForm
+        nidoId={nidoId}
+        estadoActual={detalle ? detalle.estado : ''}
+        modo="editar"
+        eventoInicial={evtEditando}
+        fechaDescubrimiento={detalle ? detalle.fecha_descubrimiento : null}
+        onGuardar={handleGuardarEvento}
+        onCerrar={() => setEvtEditando(null)}
       />
     )
   }
@@ -370,7 +422,7 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar, onEditar
                       + Nuevo evento
                     </button>
                   )}
-                  <NestEventsHistory eventos={eventos} onVerDetalle={setEvtDetalle} />
+                  <NestEventsHistory eventos={eventos} onVerDetalle={setEvtDetalle} onEditar={puedeCrear ? handleEditarEvt : null} />
                 </Seccion>
 
                 <Seccion titulo="Imágenes">
@@ -413,6 +465,7 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar, onEditar
         <EventDetailModal
           evento={evtDetalle}
           onCerrar={() => setEvtDetalle(null)}
+          onEditar={puedeCrear ? handleEditarEvt : null}
         />
       )}
     </>

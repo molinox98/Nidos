@@ -1,7 +1,7 @@
 import { formatoFechaHora, textoTipoEvento, textoEstado } from '../utils/date'
 
 // DETALLE COMPLETO DE UN EVENTO EN MODAL
-export default function EventDetailModal({ evento, onCerrar }) {
+export default function EventDetailModal({ evento, onCerrar, onEditar }) {
   return (
     <div className="detalle-modal-overlay" onClick={onCerrar}>
       <div className="detalle-modal-contenido" onClick={(e) => e.stopPropagation()}>
@@ -48,6 +48,9 @@ export default function EventDetailModal({ evento, onCerrar }) {
         </div>
 
         <div className="detalle-modal-acciones">
+          {onEditar && (
+            <button className="detalle-modal-boton-editar" onClick={() => onEditar(evento)}>Editar evento</button>
+          )}
           <button className="form-boton-cancelar" onClick={onCerrar}>Cerrar</button>
         </div>
       </div>
