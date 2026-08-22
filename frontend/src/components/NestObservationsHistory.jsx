@@ -1,5 +1,5 @@
 // LISTA CRONOLÓGICA DE OBSERVACIONES DEL NIDO
-export default function NestObservationsHistory({ observaciones, onVerDetalle, onEditar }) {
+export default function NestObservationsHistory({ observaciones, onVerDetalle, onEditar, onEliminar }) {
   if (!observaciones || observaciones.length === 0) {
     return <p className="panel-vacio">No hay observaciones registradas.</p>
   }
@@ -34,6 +34,11 @@ export default function NestObservationsHistory({ observaciones, onVerDetalle, o
             {onEditar && (
               <button className="panel-historico-boton-editar" onClick={() => onEditar(obs)}>
                 Editar
+              </button>
+            )}
+            {onEliminar && (
+              <button className="panel-historico-boton-eliminar" onClick={() => onEliminar(obs)}>
+                Eliminar
               </button>
             )}
           </div>

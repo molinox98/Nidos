@@ -1254,6 +1254,45 @@
   margin-top: 0.4rem;
 }
 
+/* Botón eliminar en los históricos */
+
+.panel-historico-boton-eliminar {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  background: transparent;
+  color: #b33a3a;
+  border: 1px solid #e0bfbf;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.panel-historico-boton-eliminar:hover {
+  background: #b33a3a;
+  color: #fff;
+}
+
+/* Botón eliminar en modales de detalle */
+
+.detalle-modal-boton-eliminar {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  color: #b33a3a;
+  border: 1px solid #e0bfbf;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.detalle-modal-boton-eliminar:hover {
+  background: #b33a3a;
+  color: #fff;
+}
+
 
 /* Botón nuevo nido sobre mapa */
 

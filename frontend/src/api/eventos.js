@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPatch } from './client'
+import { apiGet, apiPost, apiPatch, apiDelete } from './client'
 
 // LISTAR EVENTOS
 export function getEventos() {
@@ -13,4 +13,9 @@ export function createEvento(body) {
 // ACTUALIZAR EVENTO (PATCH)
 export function updateEvento(id, body) {
   return apiPatch(`/api/eventos/${id}/`, body)
+}
+
+// ELIMINAR EVENTO
+export function deleteEvento(id) {
+  return apiDelete(`/api/eventos/${id}/`)
 }

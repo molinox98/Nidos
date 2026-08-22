@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { getNidoDetalle, updateNido } from '../api/nidos'
-import { getObservaciones } from '../api/observaciones'
-import { getEventos } from '../api/eventos'
+import { getObservaciones, deleteObservacion } from '../api/observaciones'
+import { getEventos, deleteEvento } from '../api/eventos'
 import { getImagenes, marcarImagenPrincipal } from '../api/imagenes'
 import { formatoFecha, textoEstado, colorEstado } from '../utils/date'
 import { useAuth } from '../context/AuthContext'
@@ -63,6 +63,7 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar, onEditar
   const [evtEditando, setEvtEditando] = useState(null)
 
   const puedeCrear = usuario && (usuario.rol === 'admin' || usuario.rol === 'bander')
+  const puedeEliminar = usuario && usuario.rol === 'admin'
 
   // FECHA MÁS ANTIGUA ENTRE OBSERVACIONES Y EVENTOS DEL NIDO
   const fechaMaximaDescubrimiento = useMemo(() => {
@@ -178,6 +179,59 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar, onEditar
     setMostrandoFormEvento(false)
     cargarDatos()
     if (onRecargar) onRecargar()
+  }
+
+  // ELIMINAR OBSERVACIÓN
+  const handleEliminarObs = (obs) => {
+    if (!window.confirm('¿Seguro que quieres eliminar esta observación? Si tiene imágenes asociadas, también se eliminarán.')) return
+    deleteObservacion(obs.id)
+      .then(() => {
+        setObsDetalle(null)
+        cargarDatos()
+        if (onRecargar) onRecargar()
+      })
+      .catch(() => {})
+  }
+
+  // ELIMINAR EVENTO
+  const handleEliminarEvt = async (ev) => {
+    if (!window.confirm('¿Seguro que quieres eliminar este evento? Esta acción no se puede deshacer.')) return
+    try {
+      await deleteEvento(ev.id)
+
+      // RECALCULAR ESTADO SI ES CAMBIO DE ESTADO
+      if (ev.tipo_evento === 'cambio_estado') {
+        // RESTO DE CAMBIOS DE ESTADO EXCLUYENDO EL ELIMINADO
+        const resto = eventos
+          .filter((e) => e.tipo_evento === 'cambio_estado' && e.id !== ev.id)
+          .sort((a, b) => {
+            if (a.fecha_evento !== b.fecha_evento) return a.fecha_evento > b.fecha_evento ? -1 : 1
+            return a.id > b.id ? -1 : 1
+          })
+
+        // SI ERA EL ÚLTIMO → RECALCULAR
+        const eraElUltimo = resto.length === 0 ||
+          resto.every((e) =>
+            e.fecha_evento < ev.fecha_evento ||
+            (e.fecha_evento === ev.fecha_evento && e.id < ev.id)
+          )
+
+        if (eraElUltimo) {
+          if (resto.length > 0) {
+            const fechaEstado = String(resto[0].fecha_evento).split('T')[0]
+            const patchNido = { estado: resto[0].estado_nuevo, fecha_estado: fechaEstado }
+            if (resto[0].descripcion) patchNido.motivo_estado = resto[0].descripcion
+            try { await updateNido(nidoId, patchNido) } catch { /* SILENCIOSO */ }
+          } else {
+            try { await updateNido(nidoId, { estado: 'activo', fecha_estado: null, motivo_estado: 'Sin eventos de cambio de estado registrados' }) } catch { /* SILENCIOSO */ }
+          }
+        }
+      }
+
+      setEvtDetalle(null)
+      cargarDatos()
+      if (onRecargar) onRecargar()
+    } catch { /* SILENCIOSO */ }
   }
 
   // RECARGA TRAS SUBIDA O MARCAR PRINCIPAL
@@ -410,7 +464,7 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar, onEditar
                       + Nueva observación
                     </button>
                   )}
-                  <NestObservationsHistory observaciones={observaciones} onVerDetalle={setObsDetalle} onEditar={puedeCrear ? handleEditarObs : null} />
+                  <NestObservationsHistory observaciones={observaciones} onVerDetalle={setObsDetalle} onEditar={puedeCrear ? handleEditarObs : null} onEliminar={puedeEliminar ? handleEliminarObs : null} />
                 </Seccion>
 
                 <Seccion titulo="Histórico de eventos">
@@ -422,7 +476,7 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar, onEditar
                       + Nuevo evento
                     </button>
                   )}
-                  <NestEventsHistory eventos={eventos} onVerDetalle={setEvtDetalle} onEditar={puedeCrear ? handleEditarEvt : null} />
+                  <NestEventsHistory eventos={eventos} onVerDetalle={setEvtDetalle} onEditar={puedeCrear ? handleEditarEvt : null} onEliminar={puedeEliminar ? handleEliminarEvt : null} />
                 </Seccion>
 
                 <Seccion titulo="Imágenes">
@@ -459,6 +513,7 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar, onEditar
           imagenes={imagenes}
           onCerrar={() => setObsDetalle(null)}
           onEditar={puedeCrear ? handleEditarObs : null}
+          onEliminar={puedeEliminar ? handleEliminarObs : null}
         />
       )}
       {evtDetalle && (
@@ -466,6 +521,7 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar, onEditar
           evento={evtDetalle}
           onCerrar={() => setEvtDetalle(null)}
           onEditar={puedeCrear ? handleEditarEvt : null}
+          onEliminar={puedeEliminar ? handleEliminarEvt : null}
         />
       )}
     </>
