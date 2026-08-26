@@ -324,22 +324,6 @@
   background: #f4f7f2;
 }
 
-.layout-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 300px;
-  color: #888;
-  text-align: center;
-}
-
-.layout-placeholder h2 {
-  font-size: 1.5rem;
-  color: #24302a;
-  margin-bottom: 0.5rem;
-}
-
 /* Mapa de nidos */
 
 .nests-map {

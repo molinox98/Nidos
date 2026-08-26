@@ -7,9 +7,6 @@ import UsersManager from './UsersManager'
 
 const SECCIONES = [
   { id: 'especies', label: 'Gestión de especies' },
-  { id: 'nidos', label: 'Gestión de nidos' },
-  { id: 'observaciones', label: 'Observaciones' },
-  { id: 'imagenes', label: 'Imágenes' },
   { id: 'usuarios', label: 'Usuarios' },
 ]
 
@@ -98,12 +95,6 @@ function AppLayout() {
           {seccionActiva === null && <NestsMap sidebarAbierto={sidebarAbierto} />}
           {seccionActiva === 'especies' && <SpeciesManager />}
           {seccionActiva === 'usuarios' && <UsersManager />}
-          {seccionActiva !== null && seccionActiva !== 'especies' && seccionActiva !== 'usuarios' && (
-            <div className="layout-placeholder">
-              <h2>{SECCIONES.find((s) => s.id === seccionActiva)?.label}</h2>
-              <p>Sección en desarrollo. Se implementará en una fase posterior.</p>
-            </div>
-          )}
         </main>
       </div>
     </div>
