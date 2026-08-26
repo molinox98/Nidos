@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { formatoFecha } from '../utils/date'
 import ImageViewerModal from './ImageViewerModal'
 
-// ACCIONES DE GALERÍA: MARCAR PRINCIPAL
-export default function NestImagesGallery({ imagenes, puedeEditar, onMarcarPrincipal }) {
+// ACCIONES DE GALERÍA: MARCAR PRINCIPAL / ELIMINAR
+export default function NestImagesGallery({ imagenes, puedeEditar, puedeEliminar, onMarcarPrincipal, onEliminar }) {
   const [imagenSeleccionada, setImagenSeleccionada] = useState(null)
 
   if (!imagenes || imagenes.length === 0) {
@@ -33,14 +33,24 @@ export default function NestImagesGallery({ imagenes, puedeEditar, onMarcarPrinc
                 {img.usuario_nombre && ` · ${img.usuario_nombre}`}
               </span>
               {img.es_principal && <span className="panel-galeria-principal">Principal</span>}
-              {!img.es_principal && puedeEditar && (
-                <button
-                  className="panel-galeria-boton-principal"
-                  onClick={() => onMarcarPrincipal(img.id)}
-                >
-                  Marcar como principal
-                </button>
-              )}
+              <div className="panel-galeria-acciones">
+                {!img.es_principal && puedeEditar && (
+                  <button
+                    className="panel-galeria-boton-principal"
+                    onClick={() => onMarcarPrincipal(img.id)}
+                  >
+                    Marcar como principal
+                  </button>
+                )}
+                {puedeEliminar && (
+                  <button
+                    className="imagen-galeria-boton-eliminar"
+                    onClick={() => onEliminar(img)}
+                  >
+                    Eliminar
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         ))}

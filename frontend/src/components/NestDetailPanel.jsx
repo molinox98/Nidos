@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { getNidoDetalle, updateNido } from '../api/nidos'
 import { getObservaciones, deleteObservacion } from '../api/observaciones'
 import { getEventos, deleteEvento } from '../api/eventos'
-import { getImagenes, marcarImagenPrincipal } from '../api/imagenes'
+import { getImagenes, marcarImagenPrincipal, deleteImagen } from '../api/imagenes'
 import { formatoFecha, textoEstado, colorEstado } from '../utils/date'
 import { useAuth } from '../context/AuthContext'
 import NestObservationsHistory from './NestObservationsHistory'
@@ -252,6 +252,17 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar, onEditar
     }
   }
 
+  // ELIMINAR IMAGEN
+  const handleEliminarImagen = (img) => {
+    if (!window.confirm('¿Seguro que quieres eliminar esta imagen? Se borrará también el archivo asociado.')) return
+    deleteImagen(img.id)
+      .then(() => {
+        cargarDatos()
+        if (onRecargar) onRecargar()
+      })
+      .catch(() => {})
+  }
+
   if (mostrandoFormObs) {
     return (
       <NestObservationForm
@@ -498,7 +509,9 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar, onEditar
                   <NestImagesGallery
                     imagenes={imagenes}
                     puedeEditar={puedeCrear}
+                    puedeEliminar={puedeEliminar}
                     onMarcarPrincipal={handleMarcarPrincipal}
+                    onEliminar={handleEliminarImagen}
                   />
                 </Seccion>
               </>

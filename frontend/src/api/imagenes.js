@@ -1,4 +1,4 @@
-import { apiGet, apiRequest } from './client'
+import { apiGet, apiPost, apiDelete, apiRequest } from './client'
 
 // LISTAR IMÁGENES DE NIDOS
 export function getImagenes() {
@@ -19,4 +19,9 @@ export function marcarImagenPrincipal(id) {
     method: 'POST',
     body: JSON.stringify({}),
   })
+}
+
+// ELIMINAR IMAGEN
+export function deleteImagen(id) {
+  return apiDelete(`/api/imagenes/${id}/`)
 }

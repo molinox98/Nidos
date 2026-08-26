@@ -26,6 +26,15 @@ class ImagenNidoViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(usuario=self.request.user)
 
+    # BORRADO DE ARCHIVO FÍSICO ANTES DE ELIMINAR EL REGISTRO
+    def perform_destroy(self, instancia):
+        try:
+            if instancia.archivo:
+                instancia.archivo.delete(save=False)
+        except Exception:
+            pass
+        instancia.delete()
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)

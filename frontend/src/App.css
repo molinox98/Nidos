@@ -979,6 +979,15 @@
   background: #d35400;
 }
 
+/* Fila de acciones en galería */
+
+.panel-galeria-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.25rem;
+}
+
 /* Formulario subida imagen inline */
 
 .form-subida-imagen {
@@ -1293,6 +1302,25 @@
   color: #fff;
 }
 
+/* Botón eliminar en galería de imágenes */
+
+.imagen-galeria-boton-eliminar {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  background: transparent;
+  color: #b33a3a;
+  border: 1px solid #e0bfbf;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.imagen-galeria-boton-eliminar:hover {
+  background: #b33a3a;
+  color: #fff;
+}
 
 /* Botón nuevo nido sobre mapa */
 
