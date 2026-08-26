@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPatch } from './client'
+import { apiGet, apiPost, apiPatch, apiDelete } from './client'
 
 // DATOS COMPACTOS DE NIDOS PARA EL MAPA
 export function getNidosMapa() {
@@ -18,4 +18,9 @@ export function createNido(body) {
 // ACTUALIZAR NIDO (PATCH)
 export function updateNido(id, body) {
   return apiPatch(`/api/nidos/${id}/`, body)
+}
+
+// ELIMINAR NIDO
+export function deleteNido(id) {
+  return apiDelete(`/api/nidos/${id}/`)
 }

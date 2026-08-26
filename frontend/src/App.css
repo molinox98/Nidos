@@ -1739,6 +1739,40 @@
   color: #fff;
 }
 
+/* Botón eliminar nido en ficha */
+
+.panel-detalle-boton-eliminar {
+  display: inline-block;
+  margin-bottom: 0.9rem;
+  margin-left: 0.5rem;
+  padding: 0.5rem 1.1rem;
+  background: transparent;
+  color: #b33a3a;
+  border: 1px solid #e0bfbf;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.panel-detalle-boton-eliminar:hover {
+  background: #b33a3a;
+  color: #fff;
+}
+
+/* Error de eliminación de nido */
+
+.panel-error-eliminar {
+  margin-bottom: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: #fdf0ef;
+  color: #b33a3a;
+  border: 1px solid #e0bfbf;
+  border-radius: 6px;
+  font-size: 0.82rem;
+}
+
 /* === Formulario grupo === */
 
 .form-grupo {

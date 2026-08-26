@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { getNidoDetalle, updateNido } from '../api/nidos'
+import { getNidoDetalle, updateNido, deleteNido } from '../api/nidos'
 import { getObservaciones, deleteObservacion } from '../api/observaciones'
 import { getEventos, deleteEvento } from '../api/eventos'
 import { getImagenes, marcarImagenPrincipal, deleteImagen } from '../api/imagenes'
@@ -61,9 +61,11 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar, onEditar
   const [evtDetalle, setEvtDetalle] = useState(null)
   const [obsEditando, setObsEditando] = useState(null)
   const [evtEditando, setEvtEditando] = useState(null)
+  const [errorEliminarNido, setErrorEliminarNido] = useState(null)
 
   const puedeCrear = usuario && (usuario.rol === 'admin' || usuario.rol === 'bander')
   const puedeEliminar = usuario && usuario.rol === 'admin'
+  const puedeEliminarNido = puedeEliminar && detalle && (detalle.estado === 'destruido' || detalle.estado === 'retirado')
 
   // FECHA MÁS ANTIGUA ENTRE OBSERVACIONES Y EVENTOS DEL NIDO
   const fechaMaximaDescubrimiento = useMemo(() => {
@@ -263,6 +265,21 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar, onEditar
       .catch(() => {})
   }
 
+  // ELIMINAR NIDO
+  const handleEliminarNido = () => {
+    if (!window.confirm('¿Seguro que quieres eliminar este nido? Solo se puede eliminar si no tiene observaciones ni imágenes asociadas. Si es el último nido de su grupo, también se eliminará el grupo. Esta acción no se puede deshacer.')) return
+    setErrorEliminarNido(null)
+    deleteNido(nidoId)
+      .then(() => {
+        if (onCerrar) onCerrar()
+        if (onRecargar) onRecargar()
+      })
+      .catch((err) => {
+        const msg = err?.data?.detail || 'No se ha podido eliminar el nido.'
+        setErrorEliminarNido(msg)
+      })
+  }
+
   if (mostrandoFormObs) {
     return (
       <NestObservationForm
@@ -361,6 +378,19 @@ export default function NestDetailPanel({ nidoId, onCerrar, onRecargar, onEditar
                   >
                     Editar nido
                   </button>
+                )}
+
+                {puedeEliminarNido && (
+                  <button
+                    className="panel-detalle-boton-eliminar"
+                    onClick={handleEliminarNido}
+                  >
+                    Eliminar nido
+                  </button>
+                )}
+
+                {errorEliminarNido && (
+                  <p className="panel-error-eliminar">{errorEliminarNido}</p>
                 )}
 
                 {detalle.grupo_nombre && (
