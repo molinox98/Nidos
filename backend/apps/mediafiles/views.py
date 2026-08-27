@@ -1,3 +1,5 @@
+import logging
+
 from django.db import transaction
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -7,6 +9,9 @@ from rest_framework.response import Response
 from apps.common.permissions import EsAdminOBander, SoloAdmin
 from apps.mediafiles.models import ImagenNido
 from apps.mediafiles.serializers import ImagenNidoSerializer
+from apps.mediafiles.storage import ensure_minio_bucket
+
+logger = logging.getLogger(__name__)
 
 
 # CRUD DE IMÁGENES CON CONTROL DE FOTO PRINCIPAL
@@ -36,6 +41,15 @@ class ImagenNidoViewSet(viewsets.ModelViewSet):
         instancia.delete()
 
     def create(self, request, *args, **kwargs):
+        try:
+            ensure_minio_bucket()
+        except Exception:
+            logger.exception('No se pudo preparar el almacenamiento de imágenes (MinIO).')
+            return Response(
+                {'detail': 'No se pudo preparar el almacenamiento de imágenes.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
