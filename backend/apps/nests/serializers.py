@@ -37,18 +37,6 @@ class NidoSerializer(serializers.ModelSerializer):
         ]
 
 
-class ObservacionNidoMapaSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    fecha_observacion = serializers.DateField()
-    especie = serializers.CharField(source='especie.nombre_comun', default=None)
-    ocupado = serializers.BooleanField()
-    hay_huevos = serializers.BooleanField()
-    cantidad_huevos = serializers.IntegerField()
-    hay_polluelos = serializers.BooleanField()
-    cantidad_polluelos = serializers.IntegerField()
-    notas = serializers.CharField(default='')
-
-
 # SERIALIZADOR COMPACTO PARA EL MAPA (TODOS LOS CAMPOS DERIVADOS)
 class NidoMapaSerializer(serializers.Serializer):
     id = serializers.IntegerField()

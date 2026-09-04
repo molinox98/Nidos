@@ -29,7 +29,6 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     ]
 
     id = models.BigAutoField(primary_key=True)
-    # ROLES: ADMIN, BANDER, CONSULTA
 
     nombre = models.CharField(max_length=150)
     email = models.EmailField(unique=True)
